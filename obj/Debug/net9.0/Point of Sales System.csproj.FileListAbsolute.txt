@@ -94,3 +94,4 @@ C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\refin
 C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.pdb
 C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.genruntimeconfig.cache
 C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\ref\Point of Sales System.dll
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.sourcelink.json
