@@ -1,0 +1,96 @@
+C:\Users\saave\Documents\SE-Project\Point of Sales System\bin\Debug\net9.0\appsettings.Development.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\bin\Debug\net9.0\appsettings.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\bin\Debug\net9.0\Point of Sales System.staticwebassets.runtime.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\bin\Debug\net9.0\Point of Sales System.staticwebassets.endpoints.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\bin\Debug\net9.0\Point of Sales System.exe
+C:\Users\saave\Documents\SE-Project\Point of Sales System\bin\Debug\net9.0\Point of Sales System.deps.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\bin\Debug\net9.0\Point of Sales System.runtimeconfig.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\bin\Debug\net9.0\Point of Sales System.dll
+C:\Users\saave\Documents\SE-Project\Point of Sales System\bin\Debug\net9.0\Point of Sales System.pdb
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\rpswa.dswa.cache.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.AssemblyInfoInputs.cache
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.AssemblyInfo.cs
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.csproj.CoreCompileInputs.cache
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.RazorAssemblyInfo.cache
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.RazorAssemblyInfo.cs
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\rjimswa.dswa.cache.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\scopedcss\bundle\Point of Sales System.styles.css
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\scopedcss\projectbundle\Point of Sales System.bundle.scp.css
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\3ib7josj0l-b9sayid5wm.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\hyhbqar0lp-61n19gt1b8.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\jkp367ezt8-xtxxf3hu2r.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\eu7rnnrynb-bqjiyaj88i.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\ytulw4uodb-c2jlpeoesf.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\9mkkp8h4r2-erw9l3u2r3.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\mhue8kb9mc-aexeepp0ev.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\gow17v4uii-d7shbmvgxk.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\rcnirn5x7z-ausgxo2sd3.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\ob7tye6z1k-k8d9w2qqmf.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\ga5yktqk8q-cosvhxvwiu.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\zi7qr214dy-ub07r2b239.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\gztd41gkin-fvhpjtyr6v.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\h4xmwr9mtb-b7pk76d08c.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\7agzfv3cft-fsbi9cje9m.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\vcgqlurj2w-rzd6atqjts.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\vokz59co6m-ee0r1s7dh0.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\hkcit9buyd-dxx9fxp4il.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\pa4zn3ccii-jd9uben2k1.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\es8zcw6127-khv3u5hwcm.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\bo2sk1tsh2-r4e9w2rdcm.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\o2w7qfbxvc-lcd1t2u6c8.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\ertrz57mpf-c2oey78nd0.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\it7ekq2cbe-tdbxkamptv.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\8oadv9dkc4-j5mq2jizvt.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\xo6frccdhf-06098lyss8.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\ov13jfi085-nvvlpmu67g.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\vr541i9n6u-s35ty4nyc5.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\yb2424f0l8-pj5nd1wqec.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\yg33dawm0k-46ein0sx1k.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\e3l8a01a0c-v0zj4ognzu.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\bg0mxw02hw-37tfw0ft22.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\h1yw339rwk-hrwsygsryq.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\o4h94ygqix-pk9g2wxc8p.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\vrbursac3k-ft3s53vfgj.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\2kr5gfs42z-6cfz1n2cew.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\ufzi9if3cx-6pdc2jztkx.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\6ssefx26pi-493y06b0oq.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\g5mwrclyid-iovd86k7lj.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\333opom3hw-vr1egmr9el.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\uw69p8lebd-kbrnm935zg.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\7xpze593a3-jj8uyg4cgr.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\78w4uk7p88-y7v9cxd14o.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\ob5bmybbg3-notf2xhcfb.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\ckxw9dekyb-h1s4sie4z3.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\nkk0p76wki-63fj8s7r0e.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\stfboovqnp-0j3bgjxly4.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\hxpp2irpxz-47otxtyo56.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\luoprwj996-4v8eqarkd7.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\k1223adnuf-356vix0kms.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\9fdzndtf6u-83jwlth58m.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\7twsmhfpk8-mrlpezrjn3.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\nyxhe2nbk0-lzl9nlhx6b.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\vlf089zrf1-ag7o75518u.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\1s6hxyt38o-x0q3zqp4vz.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\qsjzwmoqo6-0i3buxo5is.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\vw57cvmqcm-o1o13a6vjx.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\eh40v7wp7c-ttgo8qnofa.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\3h1p8rd411-2z0ns9nrw6.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\0lpobmd7hw-muycvpuwrr.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\g1bhtmhjss-87fc7y1x7t.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\wto5tecev5-mlv21k5csn.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\2dbwd87brp-ed7lk2jiwi.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\compressed\byewmgp6v0-ed7lk2jiwi.gz
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\staticwebassets.build.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\staticwebassets.build.json.cache
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\staticwebassets.development.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\staticwebassets.build.endpoints.json
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.dll
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\refint\Point of Sales System.dll
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.pdb
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\Point of Sales System.genruntimeconfig.cache
+C:\Users\saave\Documents\SE-Project\Point of Sales System\obj\Debug\net9.0\ref\Point of Sales System.dll
