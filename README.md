@@ -11,7 +11,7 @@ Group Name: ACE
   - Eric Saavedra
   - Chris Ramos
   - Ashton Racine
-  - Ali Mandani Zadeh 
+  - Ali Madani Zadeh 
 ## Description
 The goal of this project is to create a Point of Sales System (POS) for a small and fictious store called "Ace Supermart." The POS will perform various functions
 such as tracking transactions, limited item look-up, storing employee information, setting permissions, and generating various reports
