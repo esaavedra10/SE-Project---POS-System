@@ -7,4 +7,9 @@
     <RootNamespace>Point_of_Sales_System</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="DotNetEnv" Version="3.1.1" />
+    <PackageReference Include="MongoDB.Driver" Version="3.7.1" />
+  </ItemGroup>
+
 </Project>
