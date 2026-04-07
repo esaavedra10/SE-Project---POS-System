@@ -1,5 +1,10 @@
 # Point of Sales System Project
 
+## Push Etiqutte 
+If you are pushing changes, make sure you push to the *Develop* branch and not *Main*. If it's a feature you're adding to the POS then use a feature branch off of *Develop*. Try to avoid force pushes unless absolutely necessary, and if you prefer to rebase and squash you're more than welcome to.
+
+Please try to make the code look uniform. It should look like a single person wrote it and not multiple different developers. 
+
 ## Group
 Group Name: ACE
 ### Members:

@@ -1,3 +1,9 @@
+using MongoDB.Driver;
+using MongoDB.Bson;
+using DotNetEnv;
+using JsonWriterSettings = MongoDB.Bson.IO.JsonWriterSettings;
+using System.Security.AccessControl;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -13,6 +19,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Test Zone ------------------- |
+
+// |---------------------------- |
+
 app.UseHttpsRedirection();
 app.UseRouting();
 
@@ -22,7 +32,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern: "{controller=Auth}/{action=Login}/{id?}")
     .WithStaticAssets();
 
 
