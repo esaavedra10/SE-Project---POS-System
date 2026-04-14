@@ -1,8 +1,28 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "ACE SuperMart POS Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div style="min-height: 85vh; display: flex; align-items: center; justify-content: center; background-color: #f4f6f8; padding: 28px;">
+    <div style="width: 100%; max-width: 560px; background: #ffffff; padding: 32px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); text-align: center;">
+        <h1 style="margin-top: 0; margin-bottom: 10px;">ACE SuperMart POS Dashboard</h1>
+        <h3 style="margin-top: 0; margin-bottom: 28px; font-weight: normal; color: #333;">Welcome, Employee</h3>
+
+        <div style="display: grid; gap: 14px;">
+            <a asp-controller="Sale" asp-action="Index" style="display: block; padding: 16px; font-size: 20px; text-decoration: none; border-radius: 12px; background-color: #1f6feb; color: #ffffff; transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='#1558b0'" onmouseout="this.style.backgroundColor='#1f6feb'">
+                Start Sale
+            </a>
+
+            <a asp-controller="Reports" asp-action="Index" style="display: block; padding: 16px; font-size: 20px; text-decoration: none; border-radius: 12px; background-color: #2ea043; color: #ffffff; transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='#248636'" onmouseout="this.style.backgroundColor='#2ea043'">
+                Generate Report
+            </a>
+
+            <a asp-controller="Items" asp-action="Lookup" style="display: block; padding: 16px; font-size: 20px; text-decoration: none; border-radius: 12px; background-color: #8957e5; color: #ffffff; transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='#6f42c1'" onmouseout="this.style.backgroundColor='#8957e5'">
+                Look Up Item
+            </a>
+
+            <a asp-controller="Auth" asp-action="Logout" style="display: block; padding: 16px; font-size: 20px; text-decoration: none; border-radius: 12px; background-color: #d73a49; color: #ffffff; transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='#b92d3a'" onmouseout="this.style.backgroundColor='#d73a49'">
+                Log Out
+            </a>
+        </div>
+    </div>
 </div>
