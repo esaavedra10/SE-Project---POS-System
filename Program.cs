@@ -3,10 +3,15 @@ using MongoDB.Bson;
 using DotNetEnv;
 using JsonWriterSettings = MongoDB.Bson.IO.JsonWriterSettings;
 using System.Security.AccessControl;
+using MongoExample.Models;
+using MongoExample.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("MongoDB"));
+builder.Services.AddSingleton<MongoDBService>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
