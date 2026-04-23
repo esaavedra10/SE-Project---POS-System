@@ -1,24 +1,62 @@
+@model MongoExample.Models.ViewModels.ItemLookupView
+
 @{
     ViewData["Title"] = "Look Up Item";
 }
 
-<div style="min-height: 100vh; background-color: #eef2f7; padding: 24px;">
-    <div style="width: 100%; max-width: 980px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.10);">
-        <h1 style="margin-top: 0; margin-bottom: 6px;">Look Up Item</h1>
-        <p style="margin-top: 0; margin-bottom: 22px; color: #555;">Search the ACE SuperMart catalog by item name, UPC, or SKU.</p>
+<!--
+    ITEM LOOKUP PAGE
+    This page receives an ItemLookupView model from ItemsController.
+    It uses:
+    - Model.SearchTerm        -> what the user typed into the search box
+    - Model.SelectedProduct   -> the product found from MongoDB
+-->
 
-        <div style="display: flex; gap: 12px; margin-bottom: 20px; align-items: end;">
+<div style="min-height: 100vh; background-color: #eef2f7; padding: 24px;">
+    <div
+        style="width: 100%; max-width: 980px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.10);">
+
+        <!-- Page Title -->
+        <h1 style="margin-top: 0; margin-bottom: 6px;">Look Up Item</h1>
+        <p style="margin-top: 0; margin-bottom: 22px; color: #555;">
+            Search the ACE SuperMart catalog by item name, UPC, or SKU.
+        </p>
+
+        <!--
+            SEARCH FORM
+            This sends the entered SearchTerm to:
+            ItemsController -> Lookup(ItemLookupView model)
+        -->
+        <form asp-controller="Items" asp-action="Lookup" method="post"
+              style="display: flex; gap: 12px; margin-bottom: 20px; align-items: end;">
             <div style="flex: 1;">
-                <label for="itemSearch" style="display: block; margin-bottom: 6px; font-weight: 600;">Search Item</label>
-                <input id="itemSearch" type="text" placeholder="Enter item name, UPC, or SKU" style="width: 100%; padding: 11px; border: 1px solid #c8d1dc; border-radius: 8px;" />
+                <label asp-for="SearchTerm" style="display: block; margin-bottom: 6px; font-weight: 600;">
+                    Search by SKU
+                </label>
+
+                <!--
+                    asp-for="SearchTerm"
+                    connects this input box to Model.SearchTerm
+                -->
+                <input asp-for="SearchTerm" type="text" placeholder="Enter SKU"
+                       style="width: 100%; padding: 11px; border: 1px solid #c8d1dc; border-radius: 8px;" />
             </div>
-            <button type="button" style="padding: 11px 18px; border: none; border-radius: 8px; background-color: #8957e5; color: #ffffff; cursor: pointer; font-weight: 600;">
+
+            <button type="submit"
+                    style="padding: 11px 18px; border: none; border-radius: 8px; background-color: #8957e5; color: #ffffff; cursor: pointer; font-weight: 600;">
                 Search
             </button>
-        </div>
+        </form>
 
-        <div style="border: 1px solid #d9e2ec; border-radius: 12px; padding: 16px; background-color: #f8fafc; margin-bottom: 20px;">
+        <!--
+            RESULTS TABLE
+            If a product is found, display 1 row.
+            If no product is found after searching, show a message.
+        -->
+        <div
+            style="border: 1px solid #d9e2ec; border-radius: 12px; padding: 16px; background-color: #f8fafc; margin-bottom: 20px;">
             <h3 style="margin-top: 0; margin-bottom: 12px;">Results</h3>
+
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
                 <thead>
                     <tr style="background-color: #eaf0f6;">
@@ -30,55 +68,87 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec;">1001</td>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec;">ACE Bottled Water 500ml</td>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec;">Beverages</td>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: right;">$1.25</td>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: center;">120</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec;">2034</td>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec;">Sandwich Bread Loaf</td>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec;">Bakery</td>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: right;">$2.75</td>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: center;">42</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec;">3150</td>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec;">Household Paper Towels</td>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec;">Household</td>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: right;">$5.99</td>
-                        <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: center;">18</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                    @if (Model.SelectedProduct != null)
+                    {
+                        <!-- Product found -->
+                        <tr>
+                            <td style="padding: 11px; border: 1px solid #dbe3ec;">@Model.SelectedProduct.Id</td>
+                            <td style="padding: 11px; border: 1px solid #dbe3ec;">@Model.SelectedProduct.name</td>
+                            <td style="padding: 11px; border: 1px solid #dbe3ec;">@Model.SelectedProduct.category</td>
+                            <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: right;">
+                                $@Model.SelectedProduct.price</td>
+                                <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: center;">
+                                    @Model.SelectedProduct.stock</td>
+                                </tr>
+                            }
+                    else if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
+                            {
+                                <!-- Search was made, but nothing matched -->
+                                <tr>
+                                    <td colspan="5" style="padding: 11px; border: 1px solid #dbe3ec; text-align: center;">
+                                        No product found for SKU: @Model.SearchTerm
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <!-- Page first opened, before any search -->
+                                <tr>
+                                    <td colspan="5"
+                                        style="padding: 11px; border: 1px solid #dbe3ec; text-align: center; color: #666;">
+                                        Enter a SKU above to search for an item.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
 
-        <div style="border: 2px solid #d9e2ec; border-radius: 12px; padding: 16px; background-color: #ffffff; margin-bottom: 20px; box-shadow: inset 0 0 0 1px #f3f6f9;">
-            <h3 style="margin-top: 0; margin-bottom: 12px;">Item Details</h3>
-            <div style="display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 10px;">
-                <div>
-                    <div style="font-size: 13px; color: #555;">Selected Item</div>
-                    <div style="font-weight: 600;">ACE Bottled Water 500ml</div>
+                <!--
+            ITEM DETAILS BOX
+            Shows extra details for the found product.
+            If nothing is found yet, shows a placeholder message.
+        -->
+                <div
+                    style="border: 2px solid #d9e2ec; border-radius: 12px; padding: 16px; background-color: #ffffff; margin-bottom: 20px; box-shadow: inset 0 0 0 1px #f3f6f9;">
+                    <h3 style="margin-top: 0; margin-bottom: 12px;">Item Details</h3>
+
+                    @if (Model.SelectedProduct != null)
+                    {
+                        <div style="display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 10px;">
+                            <div>
+                                <div style="font-size: 13px; color: #555;">Selected Item</div>
+                                <div style="font-weight: 600;">@Model.SelectedProduct.name</div>
+                            </div>
+
+                            <div>
+                                <div style="font-size: 13px; color: #555;">Price</div>
+                                <div style="font-weight: 600;">$@Model.SelectedProduct.price</div>
+                            </div>
+
+                            <div>
+                                <div style="font-size: 13px; color: #555;">Category</div>
+                                <div style="font-weight: 600;">@Model.SelectedProduct.category</div>
+                            </div>
+
+                            <div>
+                                <div style="font-size: 13px; color: #555;">Stock Status</div>
+                                <div style="font-weight: 600; color: @(Model.SelectedProduct.stock > 0 ? "#2ea043" : "#d1242f");">
+                                    @(Model.SelectedProduct.stock > 0 ? "In Stock" : "Out of Stock")
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="color: #666;">Search for a SKU to view item details.</div>
+                    }
                 </div>
-                <div>
-                    <div style="font-size: 13px; color: #555;">Price</div>
-                    <div style="font-weight: 600;">$1.25</div>
-                </div>
-                <div>
-                    <div style="font-size: 13px; color: #555;">Category</div>
-                    <div style="font-weight: 600;">Beverages</div>
-                </div>
-                <div>
-                    <div style="font-size: 13px; color: #555;">Stock Status</div>
-                    <div style="font-weight: 600; color: #2ea043;">In Stock</div>
-                </div>
+
+                <!-- Back Button -->
+                <a asp-controller="Home" asp-action="Index"
+                       style="display: inline-block; padding: 10px 16px; text-decoration: none; border-radius: 6px; background-color: #6c757d; color: #ffffff;">
+                    Back to Dashboard
+                </a>
             </div>
         </div>
-
-        <a asp-controller="Home" asp-action="Index" style="display: inline-block; padding: 10px 16px; text-decoration: none; border-radius: 6px; background-color: #6c757d; color: #ffffff;">
-            Back to Dashboard
-        </a>
-    </div>
-</div>
