@@ -1,67 +1,84 @@
-using System;
 using Microsoft.AspNetCore.Mvc;
-using MongoExample.Services;
 using MongoExample.Models;
+using MongoExample.Services;
 
-namespace MongoExample.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class EmployeesController : ControllerBase
+namespace MongoExample.Controllers
 {
-    private readonly MongoDBService _mongoDBService;
-
-    public EmployeesController(MongoDBService mongoDBService)
+    public class EmployeesController : Controller
     {
-        _mongoDBService = mongoDBService;
-    }
+        private readonly EmployeesServices _employeeServices;
 
-    [HttpGet]
-    public async Task<ActionResult<List<Employees>>> Get()
-    {
-        var employees = await _mongoDBService.GetAsync();
-        return Ok(employees);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Post([FromBody] Employees employee)
-    {
-        if (employee == null)
+        public EmployeesController(EmployeesServices employeeServices)
         {
-            return BadRequest("Employee data is required.");
+            _employeeServices = employeeServices;
         }
 
-        await _mongoDBService.CreateAsync(employee);
-        return CreatedAtAction(nameof(Get), new { id = employee.Id }, employee);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateEmployee(string id, [FromBody] string EID)
-    {
-        var employee = await _mongoDBService.GetAsync(id);
-
-        if (employee == null)
+        public async Task<IActionResult> Index()
         {
-            return NotFound();
+            var employees = await _employeeServices.GetAsync();
+            return View(employees);
         }
 
-        employee.EID = EID;
-        await _mongoDBService.UpdateAsync(id, employee);
-
-        return NoContent();
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
-    {
-        var employee = await _mongoDBService.GetAsync(id);
-
-        if (employee == null)
+        public async Task<IActionResult> Details(string id)
         {
-            return NotFound();
+            var employee = await _employeeServices.GetAsync(id);
+
+            if (employee == null)
+                return NotFound();
+
+            return View(employee);
         }
 
-        await _mongoDBService.RemoveAsync(id);
-        return NoContent();
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(Employees employee)
+        {
+            if (!ModelState.IsValid)
+                return View(employee);
+
+            await _employeeServices.CreateAsync(employee);
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Edit(string id)
+        {
+            var employee = await _employeeServices.GetAsync(id);
+
+            if (employee == null)
+                return NotFound();
+
+            return View(employee);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(string id, Employees employee)
+        {
+            if (!ModelState.IsValid)
+                return View(employee);
+
+            await _employeeServices.UpdateAsync(id, employee);
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Delete(string id)
+        {
+            var employee = await _employeeServices.GetAsync(id);
+
+            if (employee == null)
+                return NotFound();
+
+            return View(employee);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            await _employeeServices.RemoveAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

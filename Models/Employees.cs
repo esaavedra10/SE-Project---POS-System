@@ -15,7 +15,15 @@ public class Employees
     [JsonPropertyName("name")]
     public string name { get; set; } = null!;
 
-    [BsonElement("eid")]
-    [JsonPropertyName("eid")]
+    [BsonElement("EID")]
+    [JsonPropertyName("EID")]
     public string EID { get; set; } = null!;
+
+    [BsonElement("PID")]
+    [JsonPropertyName("PID")]
+    public string PID { get; set; } = null!;
+
+    [BsonElement("DID")]
+    [JsonPropertyName("DID")]
+    public string DID { get; set; } = null!;
 }
