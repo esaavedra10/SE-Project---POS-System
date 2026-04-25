@@ -6,9 +6,9 @@ namespace MongoExample.Controllers
 {
     public class EmployeesController : Controller
     {
-        private readonly EmployeesServices _employeeServices;
+        private readonly EmployeeServices _employeeServices;
 
-        public EmployeesController(EmployeesServices employeeServices)
+        public EmployeesController(EmployeeServices employeeServices)
         {
             _employeeServices = employeeServices;
         }

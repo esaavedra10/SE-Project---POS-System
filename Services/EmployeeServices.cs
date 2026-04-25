@@ -1,19 +1,19 @@
 using MongoExample.Models;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Bson;
 
 namespace MongoExample.Services;
 
-public class EmployeesServices
+public class EmployeeServices
 {
     private readonly IMongoCollection<Employees> _employeeCollection;
 
-    public EmployeesServices(IOptions<MongoDBSettings> mongoDBSettings)
+    public EmployeeServices(IOptions<MongoDBSettings> mongoDBSettings)
     {
         var client = new MongoClient(mongoDBSettings.Value.ConnectionURI);
         var database = client.GetDatabase(mongoDBSettings.Value.DatabaseName);
-        _employeeCollection = database.GetCollection<Employees>(mongoDBSettings.Value.CollectionName);
+        _employeeCollection = database.GetCollection<Employees>("Employees");
     }
 
     public async Task<List<Employees>> GetAsync() =>
@@ -24,13 +24,12 @@ public class EmployeesServices
 
     public async Task<Employees?> GetByNameAsync(string name)
     {
-        var filter = Builders<Employees>.Filter.Regex(
-            "name",
-            new BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(name)}$", "i")
-        );
-
+        var filter = new BsonDocument("name", name);
         return await _employeeCollection.Find(filter).FirstOrDefaultAsync();
     }
+
+    public async Task<Employees?> GetByEmployeeIdAsync(string employeeId) =>
+        await _employeeCollection.Find(x => x.EID == employeeId).FirstOrDefaultAsync();
 
     public async Task CreateAsync(Employees employee) =>
         await _employeeCollection.InsertOneAsync(employee);
