@@ -2,8 +2,19 @@
     ViewData["Title"] = "ACE SuperMart POS Login";
 }
 
+<!--
+    LOGIN PAGE
+    Posts to:
+    AuthController -> Login(string employeeId, string password)
+
+    The input names below must match the controller parameter names:
+    - employeeId
+    - password
+-->
+
 <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #f4f6f8;">
-    <div style="width: 100%; max-width: 360px; background: #ffffff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+    <div
+        style="width: 100%; max-width: 360px; background: #ffffff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
         <h2 style="margin-top: 0; margin-bottom: 16px; text-align: center;">ACE SuperMart POS Login</h2>
 
         @if (ViewBag.Error != null)
@@ -16,18 +27,19 @@
         <form asp-controller="Auth" asp-action="Login" method="post">
             <div style="margin-bottom: 12px;">
                 <label for="employeeId" style="display: block; margin-bottom: 6px;">Employee ID</label>
-                <input id="employeeId" name="employeeId" type="text" required autofocus placeholder="Enter Employee ID" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" />
+                <input id="employeeId" name="employeeId" type="text" required autofocus placeholder="Enter Employee ID"
+                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" />
             </div>
 
             <div style="margin-bottom: 16px;">
                 <label for="password" style="display: block; margin-bottom: 6px;">Password</label>
-                <input id="password" name="password" type="password" required placeholder="Enter Password" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" />
+                <input id="password" name="password" type="password" required placeholder="Enter Password"
+                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" />
             </div>
 
             <button type="submit"
                     style="width: 100%; padding: 10px; border: none; border-radius: 4px; background-color: #1f6feb; color: white; cursor: pointer;"
-                    onmouseover="this.style.backgroundColor='#1558b0'"
-                    onmouseout="this.style.backgroundColor='#1f6feb'">
+                    onmouseover="this.style.backgroundColor='#1558b0'" onmouseout="this.style.backgroundColor='#1f6feb'">
                 Login
             </button>
         </form>
