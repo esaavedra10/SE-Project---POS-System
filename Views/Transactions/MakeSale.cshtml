@@ -1,0 +1,140 @@
+@model MongoExample.Models.ViewModels.MakeSaleView
+
+@{
+    ViewData["Title"] = "Make a Sale";
+}
+
+<!--
+    MAKE SALE PAGE
+    Uses MakeSaleView as the page model
+-->
+
+<div style="min-height: 100vh; background-color: #eef2f7; padding: 24px;">
+    <div
+        style="width: 100%; max-width: 1100px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.10);">
+        <h1 style="margin-top: 0; margin-bottom: 6px;">Make a Sale</h1>
+        <p style="margin-top: 0; margin-bottom: 22px; color: #555;">
+            Scan or enter a SKU to add items to the sale.
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Message))
+        {
+            <div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background-color: #eef6ff; color: #1f4b99;">
+                @Model.Message
+            </div>
+        }
+
+        <!-- Add item by SKU -->
+        <form asp-controller="Transactions" asp-action="AddItem" method="post"
+              style="display: flex; gap: 12px; margin-bottom: 24px; align-items: end;">
+            <div style="flex: 1;">
+                <label asp-for="SkuInput" style="display: block; margin-bottom: 6px; font-weight: 600;">Enter
+                    SKU</label>
+                    <input asp-for="SkuInput" type="text" placeholder="Enter product SKU"
+                           style="width: 100%; padding: 11px; border: 1px solid #c8d1dc; border-radius: 8px;" />
+                </div>
+
+                <button type="submit"
+                        style="padding: 11px 18px; border: none; border-radius: 8px; background-color: #8957e5; color: white; cursor: pointer; font-weight: 600;">
+                    Add Item
+                </button>
+            </form>
+
+            <!-- Cart table -->
+            <div
+                style="border: 1px solid #d9e2ec; border-radius: 12px; padding: 16px; background-color: #f8fafc; margin-bottom: 20px;">
+                <h3 style="margin-top: 0; margin-bottom: 12px;">Current Sale</h3>
+
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color: #eaf0f6;">
+                            <th style="text-align: left; padding: 11px; border: 1px solid #cfd8e3;">SKU</th>
+                            <th style="text-align: left; padding: 11px; border: 1px solid #cfd8e3;">Item Name</th>
+                            <th style="text-align: left; padding: 11px; border: 1px solid #cfd8e3;">Category</th>
+                            <th style="text-align: right; padding: 11px; border: 1px solid #cfd8e3;">Price</th>
+                            <th style="text-align: center; padding: 11px; border: 1px solid #cfd8e3;">Qty</th>
+                            <th style="text-align: right; padding: 11px; border: 1px solid #cfd8e3;">Line Total</th>
+                            <th style="text-align: center; padding: 11px; border: 1px solid #cfd8e3;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.CartItems.Any())
+                        {
+                            @foreach (var item in Model.CartItems)
+                            {
+                                <tr>
+                                    <td style="padding: 11px; border: 1px solid #dbe3ec;">@item.sku</td>
+                                    <td style="padding: 11px; border: 1px solid #dbe3ec;">@item.name</td>
+                                    <td style="padding: 11px; border: 1px solid #dbe3ec;">@item.category</td>
+                                    <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: right;">$@item.price</td>
+                                    <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: center;">@item.quantity</td>
+                                    <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: right;">$@item.lineTotal</td>
+                                    <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: center;">
+                                        <form asp-controller="Transactions" asp-action="RemoveItem" method="post"
+                                              style="display: inline;">
+                                            <input type="hidden" name="sku" value="@item.sku" />
+                                            <button type="submit"
+                                                    style="padding: 6px 10px; border: none; border-radius: 6px; background-color: #d1242f; color: white; cursor: pointer;">
+                                                Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7"
+                                    style="padding: 11px; border: 1px solid #dbe3ec; text-align: center; color: #666;">
+                                    No items in the current sale.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Totals + Complete Sale -->
+            <div style="display: grid; grid-template-columns: 1fr 320px; gap: 20px;">
+                <div></div>
+
+                <div style="border: 1px solid #d9e2ec; border-radius: 12px; padding: 16px; background-color: #ffffff;">
+                    <h3 style="margin-top: 0; margin-bottom: 12px;">Sale Summary</h3>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Subtotal</span>
+                        <strong>$@Model.Subtotal</strong>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Tax</span>
+                        <strong>$@Model.Tax</strong>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 18px;">
+                        <span>Total</span>
+                        <strong>$@Model.Total</strong>
+                    </div>
+
+                    <form asp-controller="Transactions" asp-action="CompleteSale" method="post">
+                        <div style="margin-bottom: 12px;">
+                            <label asp-for="PaymentMethod"
+                                   style="display: block; margin-bottom: 6px; font-weight: 600;">Payment Method</label>
+                            <select asp-for="PaymentMethod"
+                                    style="width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px;">
+                                <option value="Cash">Cash</option>
+                                <option value="Card">Card</option>
+                                <option value="Mobile Pay">Mobile Pay</option>
+                            </select>
+                        </div>
+
+                        <button type="submit"
+                                style="width: 100%; padding: 12px; border: none; border-radius: 8px; background-color: #2ea043; color: white; cursor: pointer; font-weight: 600;">
+                            Complete Sale
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>

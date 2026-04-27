@@ -1,0 +1,48 @@
+@model MongoExample.Models.Transactions
+
+@{
+    ViewData["Title"] = "Sale Complete";
+}
+
+<div style="min-height: 100vh; background-color: #eef2f7; padding: 24px;">
+    <div
+        style="width: 100%; max-width: 900px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.10);">
+        <h1 style="margin-top: 0;">Sale Complete</h1>
+        <p style="color: #2ea043; font-weight: 600;">Transaction saved successfully.</p>
+
+        <div style="margin-bottom: 20px;">
+            <div><strong>Transaction Number:</strong> @Model.transactionNumber</div>
+            <div><strong>Employee ID:</strong> @Model.employeeId</div>
+            <div><strong>Payment Method:</strong> @Model.paymentMethod</div>
+            <div><strong>Total:</strong> $@Model.total</div>
+        </div>
+
+        <h3>Items</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+                <tr style="background-color: #eaf0f6;">
+                    <th style="text-align: left; padding: 11px; border: 1px solid #cfd8e3;">SKU</th>
+                    <th style="text-align: left; padding: 11px; border: 1px solid #cfd8e3;">Name</th>
+                    <th style="text-align: center; padding: 11px; border: 1px solid #cfd8e3;">Qty</th>
+                    <th style="text-align: right; padding: 11px; border: 1px solid #cfd8e3;">Line Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.items)
+                {
+                    <tr>
+                        <td style="padding: 11px; border: 1px solid #dbe3ec;">@item.sku</td>
+                        <td style="padding: 11px; border: 1px solid #dbe3ec;">@item.name</td>
+                        <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: center;">@item.quantity</td>
+                        <td style="padding: 11px; border: 1px solid #dbe3ec; text-align: right;">$@item.lineTotal</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <a asp-controller="Transactions" asp-action="MakeSale"
+               style="display: inline-block; padding: 10px 16px; text-decoration: none; border-radius: 6px; background-color: #1f6feb; color: #ffffff;">
+            Start New Sale
+        </a>
+    </div>
+</div>
