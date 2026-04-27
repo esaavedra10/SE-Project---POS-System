@@ -139,6 +139,14 @@ public class TransactionsController : Controller
             return View("MakeSale", BuildViewModel(cart, "Cart is empty."));
         }
 
+        // Get the logged-in employee ID from session
+        var loggedInEmployeeId = HttpContext.Session.GetString("EmployeeId");
+
+        if (string.IsNullOrWhiteSpace(loggedInEmployeeId))
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
         var subtotal = cart.Sum(x => x.lineTotal);
         var tax = Math.Round(subtotal * 0.0825m, 2);
         var total = subtotal + tax;
@@ -146,7 +154,7 @@ public class TransactionsController : Controller
         var transaction = new Transactions
         {
             transactionNumber = $"TXN-{DateTime.Now:yyyyMMddHHmmss}",
-            employeeId = "TEMP-EMP",
+            employeeId = loggedInEmployeeId,
             paymentMethod = string.IsNullOrWhiteSpace(model.PaymentMethod) ? "Cash" : model.PaymentMethod,
             subtotal = subtotal,
             tax = tax,
@@ -162,7 +170,9 @@ public class TransactionsController : Controller
                 lineTotal = x.lineTotal
             }).ToList()
         };
+
         await _transactionServices.CreateAsync(transaction);
+
 
         var allTransactions = await _transactionServices.GetAsync();
 
