@@ -41,11 +41,16 @@ namespace SE_Project___POS_System.Controllers
                 return View();
             }
 
+            // Store logged-in employee info in session
+            HttpContext.Session.SetString("EmployeeId", employee.EID);
+            HttpContext.Session.SetString("EmployeeName", employee.name);
+
             return RedirectToAction("Index", "Home");
         }
 
         public IActionResult Logout()
         {
+            HttpContext.Session.Clear();
             return RedirectToAction("Login", "Auth");
         }
     }
