@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace SE_Project___POS_System.Controllers
+namespace MongoExample.Controllers;
+
+public class SaleController : Controller
 {
-    public class SaleController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        return RedirectToAction("MakeSale", "Transactions");
     }
 }

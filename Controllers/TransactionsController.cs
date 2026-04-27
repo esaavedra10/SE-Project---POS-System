@@ -1,0 +1,184 @@
+using Microsoft.AspNetCore.Mvc;
+using MongoExample.Models;
+using MongoExample.Models.ViewModels;
+using MongoExample.Services;
+using System.Text.Json;
+
+namespace MongoExample.Controllers;
+
+public class TransactionsController : Controller
+{
+    private readonly TransactionServices _transactionServices;
+    private readonly ProductsServices _productsServices;
+
+    public TransactionsController(
+        TransactionServices transactionServices,
+        ProductsServices productsServices)
+    {
+        _transactionServices = transactionServices;
+        _productsServices = productsServices;
+    }
+
+    // -----------------------------
+    // Helpers
+    // -----------------------------
+    private List<SaleCartItem> GetCart()
+    {
+        var cartJson = HttpContext.Session.GetString("SaleCart");
+
+        if (string.IsNullOrEmpty(cartJson))
+            return new List<SaleCartItem>();
+
+        return JsonSerializer.Deserialize<List<SaleCartItem>>(cartJson) ?? new List<SaleCartItem>();
+    }
+
+    private void SaveCart(List<SaleCartItem> cart)
+    {
+        var cartJson = JsonSerializer.Serialize(cart);
+        HttpContext.Session.SetString("SaleCart", cartJson);
+    }
+
+    private void ClearCart()
+    {
+        HttpContext.Session.Remove("SaleCart");
+    }
+
+    private MakeSaleView BuildViewModel(List<SaleCartItem> cart, string? message = null)
+    {
+        var subtotal = cart.Sum(x => x.lineTotal);
+        var tax = Math.Round(subtotal * 0.0825m, 2);
+        var total = subtotal + tax;
+
+        return new MakeSaleView
+        {
+            CartItems = cart,
+            Subtotal = subtotal,
+            Tax = tax,
+            Total = total,
+            Message = message
+        };
+    }
+
+    // -----------------------------
+    // Make Sale screen
+    // -----------------------------
+    [HttpGet]
+    public IActionResult MakeSale()
+    {
+        var cart = GetCart();
+        var model = BuildViewModel(cart);
+        return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddItem(MakeSaleView model)
+    {
+        var cart = GetCart();
+
+        if (string.IsNullOrWhiteSpace(model.SkuInput))
+        {
+            return View("MakeSale", BuildViewModel(cart, "Please enter a SKU."));
+        }
+
+        var product = await _productsServices.GetBySkuAsync(model.SkuInput);
+
+        if (product == null)
+        {
+            return View("MakeSale", BuildViewModel(cart, $"No product found for SKU: {model.SkuInput}"));
+        }
+
+        var existingItem = cart.FirstOrDefault(x => x.sku == product.sku);
+
+        if (existingItem != null)
+        {
+            existingItem.quantity++;
+            existingItem.lineTotal = existingItem.price * existingItem.quantity;
+        }
+        else
+        {
+            cart.Add(new SaleCartItem
+            {
+                ProductId = product.Id,
+                sku = product.sku,
+                name = product.name,
+                category = product.category,
+                price = product.price,
+                quantity = 1,
+                lineTotal = product.price
+            });
+        }
+
+        SaveCart(cart);
+
+        return View("MakeSale", BuildViewModel(cart, $"{product.name} added to cart."));
+    }
+
+    [HttpPost]
+    public IActionResult RemoveItem(string sku)
+    {
+        var cart = GetCart();
+
+        var item = cart.FirstOrDefault(x => x.sku == sku);
+        if (item != null)
+        {
+            cart.Remove(item);
+            SaveCart(cart);
+        }
+
+        return View("MakeSale", BuildViewModel(cart));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CompleteSale(MakeSaleView model)
+    {
+        var cart = GetCart();
+
+        if (cart.Count == 0)
+        {
+            Console.WriteLine("CompleteSale stopped: cart is empty.");
+            return View("MakeSale", BuildViewModel(cart, "Cart is empty."));
+        }
+
+        var subtotal = cart.Sum(x => x.lineTotal);
+        var tax = Math.Round(subtotal * 0.0825m, 2);
+        var total = subtotal + tax;
+
+        var transaction = new Transactions
+        {
+            transactionNumber = $"TXN-{DateTime.Now:yyyyMMddHHmmss}",
+            employeeId = "TEMP-EMP",
+            paymentMethod = string.IsNullOrWhiteSpace(model.PaymentMethod) ? "Cash" : model.PaymentMethod,
+            subtotal = subtotal,
+            tax = tax,
+            total = total,
+            createdAt = DateTime.UtcNow,
+            items = cart.Select(x => new TransactionItem
+            {
+                productId = x.ProductId ?? "",
+                sku = x.sku,
+                name = x.name,
+                price = x.price,
+                quantity = x.quantity,
+                lineTotal = x.lineTotal
+            }).ToList()
+        };
+        await _transactionServices.CreateAsync(transaction);
+
+        var allTransactions = await _transactionServices.GetAsync();
+
+        ClearCart();
+
+        return RedirectToAction(nameof(SaleComplete), new { transactionNumber = transaction.transactionNumber });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SaleComplete(string transactionNumber)
+    {
+        var transaction = await _transactionServices.GetByTransactionNumberAsync(transactionNumber);
+
+        if (transaction == null)
+            return NotFound();
+
+        return View(transaction);
+    }
+}
