@@ -6,6 +6,7 @@ public class MakeSaleView
 {
     // SKU typed by cashier
     public string? SkuInput { get; set; }
+    public string? NameInput { get; set; }
 
     // Current cart items
     public List<SaleCartItem> CartItems { get; set; } = new();
@@ -20,6 +21,7 @@ public class MakeSaleView
 
     // Optional message for success/error text
     public string? Message { get; set; }
+    public string? PendingRestrictedSku { get; set; }
 }
 
 public class SaleCartItem

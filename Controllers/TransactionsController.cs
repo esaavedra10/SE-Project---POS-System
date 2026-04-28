@@ -75,16 +75,97 @@ public class TransactionsController : Controller
     {
         var cart = GetCart();
 
-        if (string.IsNullOrWhiteSpace(model.SkuInput))
+        if (string.IsNullOrWhiteSpace(model.SkuInput) && string.IsNullOrWhiteSpace(model.NameInput))
         {
-            return View("MakeSale", BuildViewModel(cart, "Please enter a SKU."));
+            return View("MakeSale", BuildViewModel(cart, "Please enter a SKU or product name."));
         }
 
-        var product = await _productsServices.GetBySkuAsync(model.SkuInput);
+        Products? product;
+
+        if (!string.IsNullOrWhiteSpace(model.SkuInput))
+        {
+            product = await _productsServices.GetBySkuAsync(model.SkuInput);
+        }
+        else
+        {
+            product = await _productsServices.GetByNameAsync(model.NameInput!);
+        }
 
         if (product == null)
         {
-            return View("MakeSale", BuildViewModel(cart, $"No product found for SKU: {model.SkuInput}"));
+            return View("MakeSale", BuildViewModel(cart, "No product found."));
+        }
+
+        if (product.isVoided)
+        {
+            return View("MakeSale", BuildViewModel(cart, $"{product.name} is voided and cannot be sold."));
+        }
+
+        if (product.stock <= 0)
+        {
+            return View("MakeSale", BuildViewModel(cart, $"{product.name} is out of stock and cannot be sold."));
+        }
+
+        if (product.ageRestricted == true)
+        {
+            var vm = BuildViewModel(cart, $"{product.name} is age restricted. Manager approval required. Approve to add this item?");
+            vm.PendingRestrictedSku = product.sku;
+            return View("MakeSale", vm);
+        }
+
+        var existingItem = cart.FirstOrDefault(x => x.sku == product.sku);
+
+        if (existingItem != null)
+        {
+            if (existingItem.quantity >= product.stock)
+            {
+                return View("MakeSale", BuildViewModel(cart, $"Cannot add more {product.name}. Only {product.stock} in stock."));
+            }
+
+            existingItem.quantity++;
+            existingItem.lineTotal = existingItem.price * existingItem.quantity;
+        }
+        else
+        {
+            cart.Add(new SaleCartItem
+            {
+                ProductId = product.Id,
+                sku = product.sku,
+                name = product.name,
+                category = product.category,
+                price = product.price,
+                quantity = 1,
+                lineTotal = product.price
+            });
+        }
+
+        SaveCart(cart);
+
+        return View("MakeSale", BuildViewModel(cart, $"{product.name} added to cart."));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ConfirmRestricted(string sku, bool isApproved)
+    {
+        var cart = GetCart();
+
+        if (string.IsNullOrWhiteSpace(sku))
+        {
+            return View("MakeSale", BuildViewModel(cart, "No SKU provided for approval."));
+        }
+
+        if (!isApproved)
+        {
+            var notAddedVm = BuildViewModel(cart, "Item was not added.");
+            notAddedVm.PendingRestrictedSku = null;
+            return View("MakeSale", notAddedVm);
+        }
+
+        var product = await _productsServices.GetBySkuAsync(sku);
+
+        if (product == null)
+        {
+            return View("MakeSale", BuildViewModel(cart, "No product found."));
         }
 
         if (product.isVoided)
@@ -125,7 +206,9 @@ public class TransactionsController : Controller
 
         SaveCart(cart);
 
-        return View("MakeSale", BuildViewModel(cart, $"{product.name} added to cart."));
+        var approvedVm = BuildViewModel(cart, $"{product.name} added to cart.");
+        approvedVm.PendingRestrictedSku = null;
+        return View("MakeSale", approvedVm);
     }
 
     [HttpPost]
@@ -187,6 +270,18 @@ public class TransactionsController : Controller
         };
 
         await _transactionServices.CreateAsync(transaction);
+
+        foreach (var item in cart)
+        {
+            var product = await _productsServices.GetBySkuAsync(item.sku);
+            if (product == null)
+                continue;
+
+            var updatedStock = product.stock - item.quantity;
+            product.stock = updatedStock < 0 ? 0 : updatedStock;
+
+            await _productsServices.UpdateAsync(product.Id, product);
+        }
 
 
         var allTransactions = await _transactionServices.GetAsync();

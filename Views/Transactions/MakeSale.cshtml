@@ -24,6 +24,22 @@
             </div>
         }
 
+        @if (!string.IsNullOrWhiteSpace(Model.PendingRestrictedSku))
+        {
+            <form asp-controller="Transactions" asp-action="ConfirmRestricted" method="post"
+                  style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background-color: #fff3cd; color: #664d03; display: flex; gap: 10px; align-items: center;">
+                <input type="hidden" name="sku" value="@Model.PendingRestrictedSku" />
+                <button type="submit" name="isApproved" value="true"
+                        style="padding: 8px 12px; border: none; border-radius: 6px; background-color: #2ea043; color: white; cursor: pointer; font-weight: 600;">
+                    Approve
+                </button>
+                <button type="submit" name="isApproved" value="false"
+                        style="padding: 8px 12px; border: none; border-radius: 6px; background-color: #d1242f; color: white; cursor: pointer; font-weight: 600;">
+                    Reject
+                </button>
+            </form>
+        }
+
         <!-- Add item by SKU -->
         <form asp-controller="Transactions" asp-action="AddItem" method="post"
               style="display: flex; gap: 12px; margin-bottom: 24px; align-items: end;">
@@ -31,6 +47,12 @@
                 <label asp-for="SkuInput" style="display: block; margin-bottom: 6px; font-weight: 600;">Enter
                     SKU</label>
                     <input asp-for="SkuInput" type="text" placeholder="Enter product SKU"
+                           style="width: 100%; padding: 11px; border: 1px solid #c8d1dc; border-radius: 8px;" />
+                </div>
+            <div style="flex: 1;">
+                <label asp-for="NameInput" style="display: block; margin-bottom: 6px; font-weight: 600;">Enter
+                    Name</label>
+                    <input asp-for="NameInput" type="text" placeholder="Enter product name"
                            style="width: 100%; padding: 11px; border: 1px solid #c8d1dc; border-radius: 8px;" />
                 </div>
 
