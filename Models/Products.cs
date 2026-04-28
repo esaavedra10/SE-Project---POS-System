@@ -33,4 +33,19 @@ public class Products
     [BsonElement("ageRestricted")]
     [BsonIgnoreIfNull]
     public bool? ageRestricted { get; set; }
+
+    [BsonElement("isVoided")]
+    public bool isVoided { get; set; } = false;
+
+    [BsonElement("voidReason")]
+    [BsonIgnoreIfNull]
+    public string? voidReason { get; set; }
+
+    [BsonElement("voidedBy")]
+    [BsonIgnoreIfNull]
+    public string? voidedBy { get; set; }
+
+    [BsonElement("voidedAt")]
+    [BsonIgnoreIfNull]
+    public DateTime? voidedAt { get; set; }
 }

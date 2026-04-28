@@ -87,10 +87,25 @@ public class TransactionsController : Controller
             return View("MakeSale", BuildViewModel(cart, $"No product found for SKU: {model.SkuInput}"));
         }
 
+        if (product.isVoided)
+        {
+            return View("MakeSale", BuildViewModel(cart, $"{product.name} is voided and cannot be sold."));
+        }
+
+        if (product.stock <= 0)
+        {
+            return View("MakeSale", BuildViewModel(cart, $"{product.name} is out of stock and cannot be sold."));
+        }
+
         var existingItem = cart.FirstOrDefault(x => x.sku == product.sku);
 
         if (existingItem != null)
         {
+            if (existingItem.quantity >= product.stock)
+            {
+                return View("MakeSale", BuildViewModel(cart, $"Cannot add more {product.name}. Only {product.stock} in stock."));
+            }
+
             existingItem.quantity++;
             existingItem.lineTotal = existingItem.price * existingItem.quantity;
         }

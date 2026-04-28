@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MongoExample.Services;
+using MongoExample.Models;
 
 namespace SE_Project___POS_System.Controllers
 {
@@ -44,6 +45,7 @@ namespace SE_Project___POS_System.Controllers
             // Store logged-in employee info in session
             HttpContext.Session.SetString("EmployeeId", employee.EID);
             HttpContext.Session.SetString("EmployeeName", employee.name);
+            HttpContext.Session.SetString("EmployeeRole", DetermineRole(employee));
 
             return RedirectToAction("Index", "Home");
         }
@@ -52,6 +54,23 @@ namespace SE_Project___POS_System.Controllers
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login", "Auth");
+        }
+
+        private static string DetermineRole(Employees employee)
+        {
+            var pid = employee.PID?.Trim();
+            if (string.IsNullOrEmpty(pid))
+            {
+                return "Employee";
+            }
+
+            var normalizedPid = pid.ToUpperInvariant();
+            if (normalizedPid.StartsWith("M"))
+            {
+                return "Manager";
+            }
+
+            return "Employee";
         }
     }
 }

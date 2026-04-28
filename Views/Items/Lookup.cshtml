@@ -2,6 +2,9 @@
 
 @{
     ViewData["Title"] = "Look Up Item";
+    var employeeRole = Context.Session.GetString("EmployeeRole");
+    var isManager = string.Equals(employeeRole, "Manager", StringComparison.OrdinalIgnoreCase);
+    
 }
 
 <!--
@@ -133,11 +136,47 @@
 
                             <div>
                                 <div style="font-size: 13px; color: #555;">Stock Status</div>
-                                <div style="font-weight: 600; color: @(Model.SelectedProduct.stock > 0 ? "#2ea043" : "#d1242f");">
-                                    @(Model.SelectedProduct.stock > 0 ? "In Stock" : "Out of Stock")
-                                </div>
+                                @if (Model.SelectedProduct.isVoided)
+                                {
+                                    <div style="font-weight: 600; color: #d1242f;">Voided</div>
+                                    @if (!string.IsNullOrWhiteSpace(Model.SelectedProduct.voidReason))
+                                    {
+                                        <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                            Reason: @Model.SelectedProduct.voidReason
+                                        </div>
+                                    }
+                                }
+                                else if (Model.SelectedProduct.stock <= 0)
+                                {
+                                    <div style="font-weight: 600; color: #d1242f;">Out of Stock</div>
+                                }
+                                else
+                                {
+                                    <div style="font-weight: 600; color: #2ea043;">In Stock</div>
+                                }
                             </div>
                         </div>
+
+                        @if (isManager)
+                        {
+                            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #e6edf3;">
+                                <form asp-controller="Products" asp-action="VoidProduct" method="post"
+                                      style="display: flex; gap: 10px; align-items: end; flex-wrap: wrap;">
+                                    <input type="hidden" name="id" value="@Model.SelectedProduct.Id" />
+
+                                    <div style="flex: 1; min-width: 220px;">
+                                        <label style="display: block; margin-bottom: 6px; font-weight: 600;">Void Reason (optional)</label>
+                                        <input type="text" name="voidReason" placeholder="Enter reason for voiding"
+                                               style="width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px;" />
+                                    </div>
+
+                                    <button type="submit"
+                                            style="padding: 10px 14px; border: none; border-radius: 8px; background-color: #d1242f; color: #ffffff; cursor: pointer; font-weight: 600;">
+                                        Void Product
+                                    </button>
+                                </form>
+                            </div>
+                        }
                     }
                     else
                     {
