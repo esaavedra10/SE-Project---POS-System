@@ -1,0 +1,146 @@
+classDiagram
+direction LR
+
+class AuthController {
+  - EmployeeServices _employeeServices
+  + Login() IActionResult
+  + Login(employeeId, password) Task~IActionResult~
+  + Logout() IActionResult
+  - DetermineRole(employee) string
+}
+
+class ProductsController {
+  - ProductsServices _productsServices
+  + Index() Task~IActionResult~
+  + Details(id) Task~IActionResult~
+  + Create() IActionResult
+  + Create(product) Task~IActionResult~
+  + Edit(id) Task~IActionResult~
+  + Edit(id, product) Task~IActionResult~
+  + Delete(id) Task~IActionResult~
+  + DeleteConfirmed(id) Task~IActionResult~
+  + VoidProduct(id, voidReason) Task~IActionResult~
+}
+
+class TransactionsController {
+  - TransactionServices _transactionServices
+  - ProductsServices _productsServices
+  + MakeSale() IActionResult
+  + AddItem(model) Task~IActionResult~
+  + ConfirmRestricted(sku, isApproved) Task~IActionResult~
+  + RemoveItem(sku) IActionResult
+  + CompleteSale(model) Task~IActionResult~
+  + SaleComplete(transactionNumber) Task~IActionResult~
+}
+
+class ControllerRoleGuards {
+  <<static>>
+  + RequireManagerFromSession(controller) IActionResult?
+}
+
+class Products {
+  + string? Id
+  + string name
+  + string category
+  + string brand
+  + string sku
+  + decimal price
+  + int stock
+  + bool taxable
+  + bool? ageRestricted
+  + bool isVoided
+  + string? voidReason
+  + string? voidedBy
+  + DateTime? voidedAt
+}
+
+class Employees {
+  + string? Id
+  + string name
+  + string EID
+  + string PID
+  + string DID
+  + string password
+}
+
+class EmployeeServices {
+  - IMongoCollection~Employees~ _employeeCollection
+  + GetByEmployeeIdAsync(employeeId) Task~Employees?~
+}
+
+class ProductsServices {
+  - IMongoCollection~Products~ _productsCollection
+  + GetAsync(id) Task~Products?~
+  + GetBySkuAsync(sku) Task~Products?~
+  + UpdateAsync(id, product) Task
+}
+
+class TransactionServices {
+  - IMongoCollection~Transactions~ _transactionsCollection
+  + CreateAsync(transaction) Task
+}
+
+class Transactions {
+  + string? Id
+  + string transactionNumber
+  + string employeeId
+  + List~TransactionItem~ items
+  + decimal subtotal
+  + decimal tax
+  + decimal total
+  + string paymentMethod
+  + DateTime createdAt
+}
+
+class LookupView {
+  <<Razor View>>
+  + Context.Session["EmployeeRole"]
+  + bool isManager
+  + POST Products/VoidProduct
+}
+
+class SessionState {
+  <<Session>>
+  + EmployeeId: string
+  + EmployeeName: string
+  + EmployeeRole: string
+  + SaleCart: json
+}
+
+class MongoDB_Employees {
+  <<collection>>
+  + "Employees"
+}
+
+class MongoDB_Products {
+  <<collection>>
+  + "Products"
+}
+
+class MongoDB_Transactions {
+  <<collection>>
+  + "Transactions"
+}
+
+AuthController --> EmployeeServices : validates login via GetByEmployeeIdAsync
+AuthController --> Employees : reads EID/PID/password
+AuthController --> SessionState : stores EmployeeId, EmployeeName, EmployeeRole
+AuthController ..> SessionState : PID startsWith("M") => EmployeeRole="Manager"
+
+ControllerRoleGuards ..> SessionState : checks EmployeeId and EmployeeRole
+ProductsController ..> ControllerRoleGuards : RequireManagerFromSession()
+ProductsController --> ProductsServices : load/update product
+ProductsController --> Products : sets isVoided, voidReason, voidedBy, voidedAt
+ProductsController ..> SessionState : uses EmployeeId for voidedBy
+
+TransactionsController --> ProductsServices : AddItem/ConfirmRestricted checks product
+TransactionsController ..> Products : blocks sale when isVoided == true
+TransactionsController --> TransactionServices : persists completed sale
+TransactionsController ..> SessionState : reads EmployeeId, SaleCart
+
+LookupView ..> SessionState : reads EmployeeRole
+LookupView ..> ProductsController : shows "Void Product" only if isManager
+
+EmployeeServices --> MongoDB_Employees : GetCollection("Employees")
+ProductsServices --> MongoDB_Products : GetCollection("Products")
+TransactionServices --> MongoDB_Transactions : GetCollection("Transactions")

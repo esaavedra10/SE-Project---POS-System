@@ -1,0 +1,61 @@
+stateDiagram-v2
+direction LR
+
+[*] --> Logged_Out
+
+state "Logged Out" as Logged_Out
+state "Login Screen" as Login_Screen
+state "Invalid Login" as Invalid_Login
+state "Authenticated Employee" as Auth_Employee
+state "Authenticated Manager" as Auth_Manager
+state "Dashboard" as Dashboard
+state "Item Lookup" as Item_Lookup
+state "View Product Details" as View_Product_Details
+state "Product Voiding" as Product_Voiding
+state "Product Voided" as Product_Voided
+state "Access Denied" as Access_Denied
+state "Start Sale" as Start_Sale
+state "Product Scanned" as Product_Scanned
+state "Cart Updated" as Cart_Updated
+state "Sale Blocked" as Sale_Blocked
+state "Payment Processing" as Payment_Processing
+state "Transaction Complete" as Transaction_Complete
+state "Reports" as Reports
+state "Logout" as Logout
+
+Logged_Out --> Login_Screen : open app
+Login_Screen --> Invalid_Login : bad id/password
+Invalid_Login --> Login_Screen : retry
+
+Login_Screen --> Auth_Manager : valid login && PID startsWith("M")
+Login_Screen --> Auth_Employee : valid login && other PID
+
+Auth_Manager --> Dashboard
+Auth_Employee --> Dashboard
+
+Dashboard --> Item_Lookup : lookup item
+Item_Lookup --> View_Product_Details : product found
+View_Product_Details --> Item_Lookup : search again
+
+View_Product_Details --> Product_Voiding : manager clicks "Void Product"
+Product_Voiding --> Product_Voided : void saved (isVoided=true)
+Product_Voided --> Item_Lookup : show void status
+
+View_Product_Details --> Access_Denied : employee attempts voiding
+Access_Denied --> Dashboard
+
+Dashboard --> Start_Sale : make sale
+Start_Sale --> Product_Scanned : add item by SKU/name
+Product_Scanned --> Sale_Blocked : product.isVoided == true
+Sale_Blocked --> Start_Sale : choose another product
+Product_Scanned --> Cart_Updated : product valid and sellable
+Cart_Updated --> Product_Scanned : scan next item
+Cart_Updated --> Payment_Processing : complete sale
+Payment_Processing --> Transaction_Complete : transaction saved
+Transaction_Complete --> Dashboard : sale complete
+
+Dashboard --> Reports : open reports
+Reports --> Dashboard : back to dashboard
+
+Dashboard --> Logout : logout action
+Logout --> Logged_Out : session cleared
