@@ -1,3 +1,4 @@
+@model MongoExample.Models.ViewModels.DailyReportView
 @{
     ViewData["Title"] = "Generate Report";
 }
@@ -7,11 +8,11 @@
         <h1 style="margin-top: 0; margin-bottom: 6px;">Generate Report</h1>
         <p style="margin-top: 0; margin-bottom: 18px; color: #555;">ACE SuperMart report center for managers and cashiers.</p>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 18px;">
+        <form asp-controller="Reports" asp-action="Index" method="post" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 18px;">
             <div>
                 <label for="reportType" style="display: block; margin-bottom: 6px; font-weight: 600;">Report Type</label>
                 <select id="reportType" style="width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 6px;">
-                    <option>Daily Sales</option>
+                    <option selected>Daily Sales</option>
                     <option>Weekly Sales</option>
                     <option>Monthly Sales</option>
                     <option>Refund Summary</option>
@@ -20,32 +21,32 @@
 
             <div>
                 <label for="reportDate" style="display: block; margin-bottom: 6px; font-weight: 600;">Select Date</label>
-                <input id="reportDate" type="date" style="width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 6px;" />
+                <input id="reportDate" name="SelectedDate" value="@(Model.SelectedDate?.ToString("yyyy-MM-dd"))" type="date" style="width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 6px;" />
             </div>
 
-            <button type="button" style="padding: 10px 16px; border: none; border-radius: 6px; background-color: #2ea043; color: #ffffff; cursor: pointer; font-weight: 600;">
+            <button type="submit" style="padding: 10px 16px; border: none; border-radius: 6px; background-color: #2ea043; color: #ffffff; cursor: pointer; font-weight: 600;">
                 Generate Report
             </button>
-        </div>
+        </form>
 
         <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; background-color: #f8fafc; margin-bottom: 16px;">
             <h3 style="margin-top: 0; margin-bottom: 12px;">Report Results</h3>
             <div style="display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 10px;">
                 <div style="padding: 10px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <div style="font-size: 13px; color: #555;">Total Sales</div>
-                    <div style="font-size: 20px; font-weight: 700;">$0.00</div>
+                    <div style="font-size: 20px; font-weight: 700;">@Model.TotalSales.ToString("C")</div>
                 </div>
                 <div style="padding: 10px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <div style="font-size: 13px; color: #555;">Total Transactions</div>
-                    <div style="font-size: 20px; font-weight: 700;">0</div>
+                    <div style="font-size: 20px; font-weight: 700;">@Model.TotalTransactions</div>
                 </div>
                 <div style="padding: 10px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <div style="font-size: 13px; color: #555;">Total Refunds</div>
-                    <div style="font-size: 20px; font-weight: 700;">$0.00</div>
+                    <div style="font-size: 20px; font-weight: 700;">@Model.TotalRefunds.ToString("C")</div>
                 </div>
                 <div style="padding: 10px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <div style="font-size: 13px; color: #555;">Total Discounts</div>
-                    <div style="font-size: 20px; font-weight: 700;">$0.00</div>
+                    <div style="font-size: 20px; font-weight: 700;">@Model.TotalDiscounts.ToString("C")</div>
                 </div>
             </div>
         </div>
@@ -60,12 +61,33 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td style="padding: 12px; border: 1px solid #e2e8f0;">--:--</td>
-                    <td style="padding: 12px; border: 1px solid #e2e8f0;">TXN-0000</td>
-                    <td style="padding: 12px; border: 1px solid #e2e8f0;">Sale</td>
-                    <td style="padding: 12px; border: 1px solid #e2e8f0; text-align: right;">$0.00</td>
-                </tr>
+                @if (Model.HasRunReport && Model.Transactions.Count == 0)
+                {
+                    <tr>
+                        <td colspan="4" style="padding: 12px; border: 1px solid #e2e8f0;">No transactions found for the selected date.</td>
+                    </tr>
+                }
+                else if (Model.Transactions.Count == 0)
+                {
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">--:--</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">TXN-0000</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Sale</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0; text-align: right;">$0.00</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var transaction in Model.Transactions)
+                    {
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid #e2e8f0;">@transaction.createdAt.ToLocalTime().ToString("HH:mm")</td>
+                            <td style="padding: 12px; border: 1px solid #e2e8f0;">@transaction.transactionNumber</td>
+                            <td style="padding: 12px; border: 1px solid #e2e8f0;">Sale</td>
+                            <td style="padding: 12px; border: 1px solid #e2e8f0; text-align: right;">@transaction.total.ToString("C")</td>
+                        </tr>
+                    }
+                }
             </tbody>
         </table>
 

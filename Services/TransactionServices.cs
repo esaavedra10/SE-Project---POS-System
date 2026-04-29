@@ -24,6 +24,12 @@ public class TransactionServices
     public async Task<Transactions?> GetByTransactionNumberAsync(string transactionNumber) =>
         await _transactionsCollection.Find(x => x.transactionNumber == transactionNumber).FirstOrDefaultAsync();
 
+    public async Task<List<Transactions>> GetByDateRangeAsync(DateTime startInclusive, DateTime endExclusive) =>
+        await _transactionsCollection
+            .Find(x => x.createdAt >= startInclusive && x.createdAt < endExclusive)
+            .SortBy(x => x.createdAt)
+            .ToListAsync();
+
     public async Task CreateAsync(Transactions transaction) =>
         await _transactionsCollection.InsertOneAsync(transaction);
 
