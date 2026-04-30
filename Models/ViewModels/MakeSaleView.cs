@@ -22,6 +22,9 @@ public class MakeSaleView
     // Optional message for success/error text
     public string? Message { get; set; }
     public string? PendingRestrictedSku { get; set; }
+    public bool ShowApprovalLogin { get; set; }
+    public string? ApprovalEmployeeId { get; set; }
+    public string? ApprovalPassword { get; set; }
 }
 
 public class SaleCartItem

@@ -40,6 +40,28 @@
             </form>
         }
 
+        @if (Model.ShowApprovalLogin)
+        {
+            <form asp-controller="Transactions" asp-action="VerifyApproval" method="post"
+                  style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background-color: #fff3cd; color: #664d03; display: grid; gap: 10px;">
+                <input asp-for="PendingRestrictedSku" type="hidden" />
+                <div>
+                    <label asp-for="ApprovalEmployeeId" style="display: block; margin-bottom: 6px; font-weight: 600;">Employee ID</label>
+                    <input asp-for="ApprovalEmployeeId" type="text"
+                           style="width: 100%; padding: 11px; border: 1px solid #c8d1dc; border-radius: 8px;" />
+                </div>
+                <div>
+                    <label asp-for="ApprovalPassword" style="display: block; margin-bottom: 6px; font-weight: 600;">Password</label>
+                    <input asp-for="ApprovalPassword" type="password"
+                           style="width: 100%; padding: 11px; border: 1px solid #c8d1dc; border-radius: 8px;" />
+                </div>
+                <button type="submit"
+                        style="padding: 8px 12px; border: none; border-radius: 6px; background-color: #8957e5; color: white; cursor: pointer; font-weight: 600; width: fit-content;">
+                    Verify Approval
+                </button>
+            </form>
+        }
+
         <!-- Add item by SKU -->
         <form asp-controller="Transactions" asp-action="AddItem" method="post"
               style="display: flex; gap: 12px; margin-bottom: 24px; align-items: end;">

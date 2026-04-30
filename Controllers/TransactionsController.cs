@@ -161,21 +161,73 @@ public class TransactionsController : Controller
             return View("MakeSale", notAddedVm);
         }
 
+        var approvalVm = BuildViewModel(cart);
+        approvalVm.PendingRestrictedSku = sku;
+        approvalVm.ShowApprovalLogin = true;
+        return View("MakeSale", approvalVm);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> VerifyApproval(MakeSaleView model)
+    {
+        var cart = GetCart();
+
+        var sku = model.PendingRestrictedSku;
+        if (string.IsNullOrWhiteSpace(sku))
+        {
+            return View("MakeSale", BuildViewModel(cart, "No SKU provided for approval."));
+        }
+
+        var employeeServices = (EmployeeServices?)HttpContext.RequestServices.GetService(typeof(EmployeeServices));
+        if (employeeServices == null)
+        {
+            var unavailableVm = BuildViewModel(cart, "Approval service unavailable.");
+            unavailableVm.PendingRestrictedSku = sku;
+            unavailableVm.ShowApprovalLogin = true;
+            return View("MakeSale", unavailableVm);
+        }
+
+        if (string.IsNullOrWhiteSpace(model.ApprovalEmployeeId) || string.IsNullOrWhiteSpace(model.ApprovalPassword))
+        {
+            var missingVm = BuildViewModel(cart, "Please enter both Employee ID and Password.");
+            missingVm.PendingRestrictedSku = sku;
+            missingVm.ShowApprovalLogin = true;
+            return View("MakeSale", missingVm);
+        }
+
+        var employee = await employeeServices.GetByEmployeeIdAsync(model.ApprovalEmployeeId);
+        if (employee == null || employee.password != model.ApprovalPassword)
+        {
+            var invalidVm = BuildViewModel(cart, "Invalid employee credentials.");
+            invalidVm.PendingRestrictedSku = sku;
+            invalidVm.ShowApprovalLogin = true;
+            return View("MakeSale", invalidVm);
+        }
+
         var product = await _productsServices.GetBySkuAsync(sku);
 
         if (product == null)
         {
-            return View("MakeSale", BuildViewModel(cart, "No product found."));
+            var notFoundVm = BuildViewModel(cart, "No product found.");
+            notFoundVm.PendingRestrictedSku = sku;
+            notFoundVm.ShowApprovalLogin = true;
+            return View("MakeSale", notFoundVm);
         }
 
         if (product.isVoided)
         {
-            return View("MakeSale", BuildViewModel(cart, $"{product.name} is voided and cannot be sold."));
+            var voidedVm = BuildViewModel(cart, $"{product.name} is voided and cannot be sold.");
+            voidedVm.PendingRestrictedSku = sku;
+            voidedVm.ShowApprovalLogin = true;
+            return View("MakeSale", voidedVm);
         }
 
         if (product.stock <= 0)
         {
-            return View("MakeSale", BuildViewModel(cart, $"{product.name} is out of stock and cannot be sold."));
+            var outOfStockVm = BuildViewModel(cart, $"{product.name} is out of stock and cannot be sold.");
+            outOfStockVm.PendingRestrictedSku = sku;
+            outOfStockVm.ShowApprovalLogin = true;
+            return View("MakeSale", outOfStockVm);
         }
 
         var existingItem = cart.FirstOrDefault(x => x.sku == product.sku);
@@ -184,7 +236,10 @@ public class TransactionsController : Controller
         {
             if (existingItem.quantity >= product.stock)
             {
-                return View("MakeSale", BuildViewModel(cart, $"Cannot add more {product.name}. Only {product.stock} in stock."));
+                var maxVm = BuildViewModel(cart, $"Cannot add more {product.name}. Only {product.stock} in stock.");
+                maxVm.PendingRestrictedSku = sku;
+                maxVm.ShowApprovalLogin = true;
+                return View("MakeSale", maxVm);
             }
 
             existingItem.quantity++;
@@ -208,6 +263,7 @@ public class TransactionsController : Controller
 
         var approvedVm = BuildViewModel(cart, $"{product.name} added to cart.");
         approvedVm.PendingRestrictedSku = null;
+        approvedVm.ShowApprovalLogin = false;
         return View("MakeSale", approvedVm);
     }
 
