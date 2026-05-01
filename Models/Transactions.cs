@@ -3,6 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace MongoExample.Models;
 
+[BsonIgnoreExtraElements]
 public class Transactions
 {
     [BsonId]
@@ -20,6 +21,9 @@ public class Transactions
 
     [BsonElement("subtotal")]
     public decimal subtotal { get; set; }
+
+    [BsonElement("discountAmount")]
+    public decimal discountAmount { get; set; } = 0;
 
     [BsonElement("tax")]
     public decimal tax { get; set; }
