@@ -25,6 +25,18 @@ public class Transactions
     [BsonElement("discountAmount")]
     public decimal discountAmount { get; set; } = 0;
 
+    [BsonElement("discountReason")]
+    [BsonIgnoreIfNull]
+    public string? discountReason { get; set; }
+
+    [BsonElement("discountApprovedByEmployeeId")]
+    [BsonIgnoreIfNull]
+    public string? discountApprovedByEmployeeId { get; set; }
+
+    [BsonElement("discountApprovedAt")]
+    [BsonIgnoreIfNull]
+    public DateTime? discountApprovedAt { get; set; }
+
     [BsonElement("tax")]
     public decimal tax { get; set; }
 

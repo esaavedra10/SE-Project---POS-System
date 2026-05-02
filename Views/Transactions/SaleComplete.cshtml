@@ -14,6 +14,24 @@
             <div><strong>Transaction Number:</strong> @Model.transactionNumber</div>
             <div><strong>Employee ID:</strong> @Model.employeeId</div>
             <div><strong>Payment Method:</strong> @Model.paymentMethod</div>
+            @if (Model.discountAmount > 0)
+            {
+                <div><strong>Discount:</strong> $@Model.discountAmount</div>
+                @if (!string.IsNullOrWhiteSpace(Model.discountReason))
+                {
+                    <div><strong>Discount Reason:</strong> @Model.discountReason</div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.discountApprovedByEmployeeId))
+                {
+                    <div><strong>Approved By (Employee ID):</strong> @Model.discountApprovedByEmployeeId</div>
+                }
+                @if (Model.discountApprovedAt.HasValue)
+                {
+                    <div><strong>Approved At (UTC):</strong> @Model.discountApprovedAt.Value.ToString("u")</div>
+                }
+            }
+            <div><strong>Subtotal (after discount):</strong> $@Model.subtotal</div>
+            <div><strong>Tax:</strong> $@Model.tax</div>
             <div><strong>Total:</strong> $@Model.total</div>
         </div>
 

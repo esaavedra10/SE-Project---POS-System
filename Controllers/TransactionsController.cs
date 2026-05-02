@@ -8,15 +8,28 @@ namespace MongoExample.Controllers;
 
 public class TransactionsController : Controller
 {
+    private const string SaleDiscountSessionKey = "SaleDiscount";
+
     private readonly TransactionServices _transactionServices;
     private readonly ProductsServices _productsServices;
+    private readonly EmployeeServices _employeeServices;
+
+    private sealed class SaleDiscountState
+    {
+        public decimal DiscountAmount { get; set; }
+        public string? DiscountReason { get; set; }
+        public string? ApprovedByEmployeeId { get; set; }
+        public DateTime? ApprovedAt { get; set; }
+    }
 
     public TransactionsController(
         TransactionServices transactionServices,
-        ProductsServices productsServices)
+        ProductsServices productsServices,
+        EmployeeServices employeeServices)
     {
         _transactionServices = transactionServices;
         _productsServices = productsServices;
+        _employeeServices = employeeServices;
     }
 
     // -----------------------------
@@ -43,18 +56,45 @@ public class TransactionsController : Controller
         HttpContext.Session.Remove("SaleCart");
     }
 
+    private SaleDiscountState? GetDiscount()
+    {
+        var json = HttpContext.Session.GetString(SaleDiscountSessionKey);
+        if (string.IsNullOrWhiteSpace(json))
+            return null;
+        return JsonSerializer.Deserialize<SaleDiscountState>(json);
+    }
+
+    private void SaveDiscount(SaleDiscountState state)
+    {
+        HttpContext.Session.SetString(SaleDiscountSessionKey, JsonSerializer.Serialize(state));
+    }
+
+    private void ClearDiscount()
+    {
+        HttpContext.Session.Remove(SaleDiscountSessionKey);
+    }
+
     private MakeSaleView BuildViewModel(List<SaleCartItem> cart, string? message = null)
     {
-        var subtotal = cart.Sum(x => x.lineTotal);
-        var tax = Math.Round(subtotal * 0.0825m, 2);
-        var total = subtotal + tax;
+        var subtotalBeforeDiscount = cart.Sum(x => x.lineTotal);
+        var applied = GetDiscount();
+        var discountAmount = Math.Min(applied?.DiscountAmount ?? 0m, subtotalBeforeDiscount);
+        var discountedSubtotal = subtotalBeforeDiscount - discountAmount;
+        var tax = Math.Round(discountedSubtotal * 0.0825m, 2);
+        var total = discountedSubtotal + tax;
 
         return new MakeSaleView
         {
             CartItems = cart,
-            Subtotal = subtotal,
+            SubtotalBeforeDiscount = subtotalBeforeDiscount,
+            DiscountAmountApplied = discountAmount,
+            DiscountedSubtotal = discountedSubtotal,
+            Subtotal = discountedSubtotal,
             Tax = tax,
             Total = total,
+            DiscountReasonInput = applied?.DiscountReason,
+            DiscountApprovedByEmployeeId = applied?.ApprovedByEmployeeId,
+            DiscountApprovedAt = applied?.ApprovedAt,
             Message = message
         };
     }
@@ -140,6 +180,7 @@ public class TransactionsController : Controller
         }
 
         SaveCart(cart);
+        ClearDiscount();
 
         return View("MakeSale", BuildViewModel(cart, $"{product.name} added to cart."));
     }
@@ -178,15 +219,6 @@ public class TransactionsController : Controller
             return View("MakeSale", BuildViewModel(cart, "No SKU provided for approval."));
         }
 
-        var employeeServices = (EmployeeServices?)HttpContext.RequestServices.GetService(typeof(EmployeeServices));
-        if (employeeServices == null)
-        {
-            var unavailableVm = BuildViewModel(cart, "Approval service unavailable.");
-            unavailableVm.PendingRestrictedSku = sku;
-            unavailableVm.ShowApprovalLogin = true;
-            return View("MakeSale", unavailableVm);
-        }
-
         if (string.IsNullOrWhiteSpace(model.ApprovalEmployeeId) || string.IsNullOrWhiteSpace(model.ApprovalPassword))
         {
             var missingVm = BuildViewModel(cart, "Please enter both Employee ID and Password.");
@@ -195,7 +227,7 @@ public class TransactionsController : Controller
             return View("MakeSale", missingVm);
         }
 
-        var employee = await employeeServices.GetByEmployeeIdAsync(model.ApprovalEmployeeId);
+        var employee = await _employeeServices.GetByEmployeeIdAsync(model.ApprovalEmployeeId);
         if (employee == null || employee.password != model.ApprovalPassword)
         {
             var invalidVm = BuildViewModel(cart, "Invalid employee credentials.");
@@ -279,7 +311,119 @@ public class TransactionsController : Controller
             SaveCart(cart);
         }
 
+        if (cart.Count == 0)
+        {
+            ClearDiscount();
+        }
+
         return View("MakeSale", BuildViewModel(cart));
+    }
+
+    [HttpPost]
+    public IActionResult RequestDiscountApproval(MakeSaleView model)
+    {
+        var cart = GetCart();
+        var baseVm = BuildViewModel(cart);
+
+        if (cart.Count == 0)
+        {
+            return View("MakeSale", BuildViewModel(cart, "Add at least one item before applying a discount."));
+        }
+
+        if (!model.DiscountAmountInput.HasValue || model.DiscountAmountInput.Value <= 0m)
+        {
+            return View("MakeSale", BuildViewModel(cart, "Discount amount must be greater than $0.00."));
+        }
+
+        var requested = Math.Round(model.DiscountAmountInput.Value, 2);
+        if (requested > baseVm.SubtotalBeforeDiscount)
+        {
+            return View("MakeSale", BuildViewModel(cart, "Discount amount cannot be greater than the subtotal."));
+        }
+
+        var role = HttpContext.Session.GetString("EmployeeRole");
+        var currentEid = HttpContext.Session.GetString("EmployeeId");
+
+        if (string.Equals(role, "Manager", StringComparison.OrdinalIgnoreCase)
+            && !string.IsNullOrWhiteSpace(currentEid))
+        {
+            SaveDiscount(new SaleDiscountState
+            {
+                DiscountAmount = requested,
+                DiscountReason = string.IsNullOrWhiteSpace(model.DiscountReasonInput) ? null : model.DiscountReasonInput.Trim(),
+                ApprovedByEmployeeId = currentEid,
+                ApprovedAt = DateTime.UtcNow
+            });
+
+            return View("MakeSale", BuildViewModel(cart, "Discount approved and applied."));
+        }
+
+        var pendingVm = BuildViewModel(cart, "Manager approval required to apply this discount.");
+        pendingVm.ShowDiscountApprovalLogin = true;
+        pendingVm.PendingDiscountAmount = requested;
+        pendingVm.PendingDiscountReason = string.IsNullOrWhiteSpace(model.DiscountReasonInput) ? null : model.DiscountReasonInput.Trim();
+        pendingVm.DiscountAmountInput = requested;
+        pendingVm.DiscountReasonInput = pendingVm.PendingDiscountReason;
+        return View("MakeSale", pendingVm);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> VerifyDiscountApproval(MakeSaleView model)
+    {
+        var cart = GetCart();
+        var baseVm = BuildViewModel(cart);
+
+        if (cart.Count == 0)
+        {
+            return View("MakeSale", BuildViewModel(cart, "Add at least one item before applying a discount."));
+        }
+
+        if (!model.PendingDiscountAmount.HasValue || model.PendingDiscountAmount.Value <= 0m)
+        {
+            return View("MakeSale", BuildViewModel(cart, "No valid pending discount was provided."));
+        }
+
+        var requested = Math.Round(model.PendingDiscountAmount.Value, 2);
+        if (requested > baseVm.SubtotalBeforeDiscount)
+        {
+            return View("MakeSale", BuildViewModel(cart, "Discount amount cannot be greater than the subtotal."));
+        }
+
+        if (string.IsNullOrWhiteSpace(model.DiscountApprovalEmployeeId) || string.IsNullOrWhiteSpace(model.DiscountApprovalPassword))
+        {
+            var missingVm = BuildViewModel(cart, "Please enter manager Employee ID and Password.");
+            missingVm.ShowDiscountApprovalLogin = true;
+            missingVm.PendingDiscountAmount = requested;
+            missingVm.PendingDiscountReason = model.PendingDiscountReason;
+            missingVm.DiscountAmountInput = requested;
+            missingVm.DiscountReasonInput = model.PendingDiscountReason;
+            return View("MakeSale", missingVm);
+        }
+
+        var manager = await _employeeServices.ValidateManagerCredentialsAsync(
+            model.DiscountApprovalEmployeeId,
+            model.DiscountApprovalPassword);
+
+        if (manager == null)
+        {
+            var invalidVm = BuildViewModel(cart, "Invalid manager credentials.");
+            invalidVm.ShowDiscountApprovalLogin = true;
+            invalidVm.PendingDiscountAmount = requested;
+            invalidVm.PendingDiscountReason = model.PendingDiscountReason;
+            invalidVm.DiscountAmountInput = requested;
+            invalidVm.DiscountReasonInput = model.PendingDiscountReason;
+            return View("MakeSale", invalidVm);
+        }
+
+        SaveDiscount(new SaleDiscountState
+        {
+            DiscountAmount = requested,
+            DiscountReason = string.IsNullOrWhiteSpace(model.PendingDiscountReason) ? null : model.PendingDiscountReason.Trim(),
+            ApprovedByEmployeeId = manager.EID,
+            ApprovedAt = DateTime.UtcNow
+        });
+
+        return View("MakeSale", BuildViewModel(cart, "Discount approved and applied."));
     }
 
     [HttpPost]
@@ -301,16 +445,23 @@ public class TransactionsController : Controller
             return RedirectToAction("Login", "Auth");
         }
 
-        var subtotal = cart.Sum(x => x.lineTotal);
-        var tax = Math.Round(subtotal * 0.0825m, 2);
-        var total = subtotal + tax;
+        var discount = GetDiscount();
+        var subtotalBeforeDiscount = cart.Sum(x => x.lineTotal);
+        var discountAmount = Math.Min(discount?.DiscountAmount ?? 0m, subtotalBeforeDiscount);
+        var discountedSubtotal = subtotalBeforeDiscount - discountAmount;
+        var tax = Math.Round(discountedSubtotal * 0.0825m, 2);
+        var total = discountedSubtotal + tax;
 
         var transaction = new Transactions
         {
             transactionNumber = $"TXN-{DateTime.Now:yyyyMMddHHmmss}",
             employeeId = loggedInEmployeeId,
             paymentMethod = string.IsNullOrWhiteSpace(model.PaymentMethod) ? "Cash" : model.PaymentMethod,
-            subtotal = subtotal,
+            subtotal = discountedSubtotal,
+            discountAmount = discountAmount,
+            discountReason = discount?.DiscountReason,
+            discountApprovedByEmployeeId = discount?.ApprovedByEmployeeId,
+            discountApprovedAt = discount?.ApprovedAt,
             tax = tax,
             total = total,
             createdAt = DateTime.UtcNow,
@@ -340,9 +491,8 @@ public class TransactionsController : Controller
         }
 
 
-        var allTransactions = await _transactionServices.GetAsync();
-
         ClearCart();
+        ClearDiscount();
 
         return RedirectToAction(nameof(SaleComplete), new { transactionNumber = transaction.transactionNumber });
     }

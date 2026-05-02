@@ -11,7 +11,10 @@ public class MakeSaleView
     // Current cart items
     public List<SaleCartItem> CartItems { get; set; } = new();
 
-    // Totals
+    // Totals (Subtotal = discounted subtotal for payment math; use SubtotalBeforeDiscount for line sum)
+    public decimal SubtotalBeforeDiscount { get; set; }
+    public decimal DiscountAmountApplied { get; set; }
+    public decimal DiscountedSubtotal { get; set; }
     public decimal Subtotal { get; set; }
     public decimal Tax { get; set; }
     public decimal Total { get; set; }
@@ -25,6 +28,17 @@ public class MakeSaleView
     public bool ShowApprovalLogin { get; set; }
     public string? ApprovalEmployeeId { get; set; }
     public string? ApprovalPassword { get; set; }
+
+    // Discount workflow (dollar amount only)
+    public decimal? DiscountAmountInput { get; set; }
+    public string? DiscountReasonInput { get; set; }
+    public bool ShowDiscountApprovalLogin { get; set; }
+    public decimal? PendingDiscountAmount { get; set; }
+    public string? PendingDiscountReason { get; set; }
+    public string? DiscountApprovalEmployeeId { get; set; }
+    public string? DiscountApprovalPassword { get; set; }
+    public string? DiscountApprovedByEmployeeId { get; set; }
+    public DateTime? DiscountApprovedAt { get; set; }
 }
 
 public class SaleCartItem

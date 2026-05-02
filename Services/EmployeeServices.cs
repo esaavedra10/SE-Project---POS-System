@@ -31,6 +31,31 @@ public class EmployeeServices
     public async Task<Employees?> GetByEmployeeIdAsync(string employeeId) =>
         await _employeeCollection.Find(x => x.EID == employeeId).FirstOrDefaultAsync();
 
+    /// <summary>
+    /// Validates credentials and ensures the employee is a manager (PID starts with "M", same rule as AuthController).
+    /// </summary>
+    public async Task<Employees?> ValidateManagerCredentialsAsync(string employeeId, string password)
+    {
+        var employee = await GetByEmployeeIdAsync(employeeId);
+        if (employee == null || employee.password != password)
+        {
+            return null;
+        }
+
+        var pid = employee.PID?.Trim();
+        if (string.IsNullOrEmpty(pid))
+        {
+            return null;
+        }
+
+        if (!pid.ToUpperInvariant().StartsWith("M"))
+        {
+            return null;
+        }
+
+        return employee;
+    }
+
     public async Task CreateAsync(Employees employee) =>
         await _employeeCollection.InsertOneAsync(employee);
 
