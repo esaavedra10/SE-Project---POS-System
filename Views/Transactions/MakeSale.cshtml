@@ -62,59 +62,6 @@
             </form>
         }
 
-        <form asp-controller="Transactions" asp-action="RequestDiscountApproval" method="post"
-              style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background-color: #eef6ff; color: #1f4b99; display: grid; gap: 10px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
-                <div>
-                    <label asp-for="DiscountAmountInput" style="display: block; margin-bottom: 6px; font-weight: 600;">Discount Amount ($)</label>
-                    <input asp-for="DiscountAmountInput" type="number" step="0.01" min="0.01"
-                           style="width: 100%; padding: 11px; border: 1px solid #c8d1dc; border-radius: 8px;" />
-                </div>
-                <div>
-                    <label asp-for="DiscountReasonInput" style="display: block; margin-bottom: 6px; font-weight: 600;">Discount Reason (optional)</label>
-                    <input asp-for="DiscountReasonInput" type="text"
-                           style="width: 100%; padding: 11px; border: 1px solid #c8d1dc; border-radius: 8px;" />
-                </div>
-                <button type="submit"
-                        style="padding: 11px 18px; border: none; border-radius: 8px; background-color: #1f6feb; color: white; cursor: pointer; font-weight: 600;">
-                    Apply Discount
-                </button>
-            </div>
-            @if (Model.DiscountAmountApplied > 0)
-            {
-                <div style="font-size: 14px;">
-                    Discount applied: <strong>$@Model.DiscountAmountApplied</strong>
-                    @if (!string.IsNullOrWhiteSpace(Model.DiscountApprovedByEmployeeId))
-                    {
-                        <span> (Approved by @Model.DiscountApprovedByEmployeeId)</span>
-                    }
-                </div>
-            }
-        </form>
-
-        @if (Model.ShowDiscountApprovalLogin)
-        {
-            <form asp-controller="Transactions" asp-action="VerifyDiscountApproval" method="post"
-                  style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background-color: #fff3cd; color: #664d03; display: grid; gap: 10px;">
-                <input asp-for="PendingDiscountAmount" type="hidden" />
-                <input asp-for="PendingDiscountReason" type="hidden" />
-                <div>
-                    <label asp-for="DiscountApprovalEmployeeId" style="display: block; margin-bottom: 6px; font-weight: 600;">Manager Employee ID</label>
-                    <input asp-for="DiscountApprovalEmployeeId" type="text"
-                           style="width: 100%; padding: 11px; border: 1px solid #c8d1dc; border-radius: 8px;" />
-                </div>
-                <div>
-                    <label asp-for="DiscountApprovalPassword" style="display: block; margin-bottom: 6px; font-weight: 600;">Manager Password</label>
-                    <input asp-for="DiscountApprovalPassword" type="password"
-                           style="width: 100%; padding: 11px; border: 1px solid #c8d1dc; border-radius: 8px;" />
-                </div>
-                <button type="submit"
-                        style="padding: 8px 12px; border: none; border-radius: 6px; background-color: #8957e5; color: white; cursor: pointer; font-weight: 600; width: fit-content;">
-                    Verify Manager Approval
-                </button>
-            </form>
-        }
-
         <!-- Add item by SKU -->
         <form asp-controller="Transactions" asp-action="AddItem" method="post"
               style="display: flex; gap: 12px; margin-bottom: 24px; align-items: end;">
@@ -198,6 +145,61 @@
 
                 <div style="border: 1px solid #d9e2ec; border-radius: 12px; padding: 16px; background-color: #ffffff;">
                     <h3 style="margin-top: 0; margin-bottom: 12px;">Sale Summary</h3>
+
+                    <form asp-controller="Transactions" asp-action="RequestDiscountApproval" method="post" style="margin-bottom: 12px;">
+                        <button type="submit"
+                                style="width: 100%; padding: 10px; border: none; border-radius: 8px; background-color: #1f6feb; color: white; cursor: pointer; font-weight: 600;">
+                            Apply Discount
+                        </button>
+                    </form>
+
+                    @if (Model.ShowDiscountApprovalPrompt)
+                    {
+                        <form asp-controller="Transactions" asp-action="VerifyDiscountApproval" method="post"
+                              style="margin-bottom: 12px; padding: 10px; border-radius: 8px; background-color: #fff3cd; color: #664d03; display: grid; gap: 8px;">
+                            <div>
+                                <label asp-for="DiscountApprovalEmployeeId" style="display: block; margin-bottom: 6px; font-weight: 600;">Manager Employee ID</label>
+                                <input asp-for="DiscountApprovalEmployeeId" type="text"
+                                       style="width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px;" />
+                            </div>
+                            <div>
+                                <label asp-for="DiscountApprovalPassword" style="display: block; margin-bottom: 6px; font-weight: 600;">Manager Password</label>
+                                <input asp-for="DiscountApprovalPassword" type="password"
+                                       style="width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px;" />
+                            </div>
+                            <button type="submit"
+                                    style="padding: 8px 12px; border: none; border-radius: 6px; background-color: #8957e5; color: white; cursor: pointer; font-weight: 600;">
+                                Approve Discount Access
+                            </button>
+                        </form>
+                    }
+
+                    @if (Model.ShowDiscountPercentOptions)
+                    {
+                        <form asp-controller="Transactions" asp-action="ApplyDiscountPercent" method="post"
+                              style="margin-bottom: 12px; padding: 10px; border-radius: 8px; background-color: #eef6ff; color: #1f4b99; display: grid; gap: 8px;">
+                            <div>
+                                <label asp-for="SelectedDiscountPercent" style="display: block; margin-bottom: 6px; font-weight: 600;">Select Discount Percentage</label>
+                                <select asp-for="SelectedDiscountPercent"
+                                        style="width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px;">
+                                    <option value="">Choose %</option>
+                                    <option value="10">10%</option>
+                                    <option value="15">15%</option>
+                                    <option value="25">25%</option>
+                                </select>
+                            </div>
+                            <button type="submit"
+                                    style="padding: 8px 12px; border: none; border-radius: 6px; background-color: #2ea043; color: white; cursor: pointer; font-weight: 600;">
+                                Apply Selected Discount
+                            </button>
+                            @if (!string.IsNullOrWhiteSpace(Model.DiscountApprovedByEmployeeId))
+                            {
+                                <div style="font-size: 13px;">
+                                    Manager approved by: <strong>@Model.DiscountApprovedByEmployeeId</strong>
+                                </div>
+                            }
+                        </form>
+                    }
 
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span>Subtotal (Before Discount)</span>

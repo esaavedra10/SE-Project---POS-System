@@ -29,12 +29,11 @@ public class MakeSaleView
     public string? ApprovalEmployeeId { get; set; }
     public string? ApprovalPassword { get; set; }
 
-    // Discount workflow (dollar amount only)
-    public decimal? DiscountAmountInput { get; set; }
-    public string? DiscountReasonInput { get; set; }
-    public bool ShowDiscountApprovalLogin { get; set; }
-    public decimal? PendingDiscountAmount { get; set; }
-    public string? PendingDiscountReason { get; set; }
+    // Discount workflow (percentage presets only)
+    public bool ShowDiscountApprovalPrompt { get; set; }
+    public bool DiscountApprovalGranted { get; set; }
+    public bool ShowDiscountPercentOptions { get; set; }
+    public int? SelectedDiscountPercent { get; set; }
     public string? DiscountApprovalEmployeeId { get; set; }
     public string? DiscountApprovalPassword { get; set; }
     public string? DiscountApprovedByEmployeeId { get; set; }

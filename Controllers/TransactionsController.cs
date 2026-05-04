@@ -16,8 +16,9 @@ public class TransactionsController : Controller
 
     private sealed class SaleDiscountState
     {
+        public bool ApprovalGranted { get; set; }
+        public int? DiscountPercent { get; set; }
         public decimal DiscountAmount { get; set; }
-        public string? DiscountReason { get; set; }
         public string? ApprovedByEmployeeId { get; set; }
         public DateTime? ApprovedAt { get; set; }
     }
@@ -92,7 +93,9 @@ public class TransactionsController : Controller
             Subtotal = discountedSubtotal,
             Tax = tax,
             Total = total,
-            DiscountReasonInput = applied?.DiscountReason,
+            DiscountApprovalGranted = applied?.ApprovalGranted ?? false,
+            ShowDiscountPercentOptions = applied?.ApprovalGranted ?? false,
+            SelectedDiscountPercent = applied?.DiscountPercent,
             DiscountApprovedByEmployeeId = applied?.ApprovedByEmployeeId,
             DiscountApprovedAt = applied?.ApprovedAt,
             Message = message
@@ -323,80 +326,42 @@ public class TransactionsController : Controller
     public IActionResult RequestDiscountApproval(MakeSaleView model)
     {
         var cart = GetCart();
-        var baseVm = BuildViewModel(cart);
 
         if (cart.Count == 0)
         {
             return View("MakeSale", BuildViewModel(cart, "Add at least one item before applying a discount."));
         }
 
-        if (!model.DiscountAmountInput.HasValue || model.DiscountAmountInput.Value <= 0m)
+        var discount = GetDiscount();
+        if (discount != null && discount.ApprovalGranted)
         {
-            return View("MakeSale", BuildViewModel(cart, "Discount amount must be greater than $0.00."));
+            var alreadyApprovedVm = BuildViewModel(cart, "Manager approval already granted. Select a discount percentage.");
+            alreadyApprovedVm.ShowDiscountApprovalPrompt = false;
+            alreadyApprovedVm.ShowDiscountPercentOptions = true;
+            return View("MakeSale", alreadyApprovedVm);
         }
 
-        var requested = Math.Round(model.DiscountAmountInput.Value, 2);
-        if (requested > baseVm.SubtotalBeforeDiscount)
-        {
-            return View("MakeSale", BuildViewModel(cart, "Discount amount cannot be greater than the subtotal."));
-        }
-
-        var role = HttpContext.Session.GetString("EmployeeRole");
-        var currentEid = HttpContext.Session.GetString("EmployeeId");
-
-        if (string.Equals(role, "Manager", StringComparison.OrdinalIgnoreCase)
-            && !string.IsNullOrWhiteSpace(currentEid))
-        {
-            SaveDiscount(new SaleDiscountState
-            {
-                DiscountAmount = requested,
-                DiscountReason = string.IsNullOrWhiteSpace(model.DiscountReasonInput) ? null : model.DiscountReasonInput.Trim(),
-                ApprovedByEmployeeId = currentEid,
-                ApprovedAt = DateTime.UtcNow
-            });
-
-            return View("MakeSale", BuildViewModel(cart, "Discount approved and applied."));
-        }
-
-        var pendingVm = BuildViewModel(cart, "Manager approval required to apply this discount.");
-        pendingVm.ShowDiscountApprovalLogin = true;
-        pendingVm.PendingDiscountAmount = requested;
-        pendingVm.PendingDiscountReason = string.IsNullOrWhiteSpace(model.DiscountReasonInput) ? null : model.DiscountReasonInput.Trim();
-        pendingVm.DiscountAmountInput = requested;
-        pendingVm.DiscountReasonInput = pendingVm.PendingDiscountReason;
-        return View("MakeSale", pendingVm);
+        var approvalVm = BuildViewModel(cart, "Manager approval required to apply a discount.");
+        approvalVm.ShowDiscountApprovalPrompt = true;
+        approvalVm.ShowDiscountPercentOptions = false;
+        return View("MakeSale", approvalVm);
     }
 
     [HttpPost]
     public async Task<IActionResult> VerifyDiscountApproval(MakeSaleView model)
     {
         var cart = GetCart();
-        var baseVm = BuildViewModel(cart);
 
         if (cart.Count == 0)
         {
             return View("MakeSale", BuildViewModel(cart, "Add at least one item before applying a discount."));
         }
 
-        if (!model.PendingDiscountAmount.HasValue || model.PendingDiscountAmount.Value <= 0m)
-        {
-            return View("MakeSale", BuildViewModel(cart, "No valid pending discount was provided."));
-        }
-
-        var requested = Math.Round(model.PendingDiscountAmount.Value, 2);
-        if (requested > baseVm.SubtotalBeforeDiscount)
-        {
-            return View("MakeSale", BuildViewModel(cart, "Discount amount cannot be greater than the subtotal."));
-        }
-
         if (string.IsNullOrWhiteSpace(model.DiscountApprovalEmployeeId) || string.IsNullOrWhiteSpace(model.DiscountApprovalPassword))
         {
             var missingVm = BuildViewModel(cart, "Please enter manager Employee ID and Password.");
-            missingVm.ShowDiscountApprovalLogin = true;
-            missingVm.PendingDiscountAmount = requested;
-            missingVm.PendingDiscountReason = model.PendingDiscountReason;
-            missingVm.DiscountAmountInput = requested;
-            missingVm.DiscountReasonInput = model.PendingDiscountReason;
+            missingVm.ShowDiscountApprovalPrompt = true;
+            missingVm.ShowDiscountPercentOptions = false;
             return View("MakeSale", missingVm);
         }
 
@@ -407,23 +372,65 @@ public class TransactionsController : Controller
         if (manager == null)
         {
             var invalidVm = BuildViewModel(cart, "Invalid manager credentials.");
-            invalidVm.ShowDiscountApprovalLogin = true;
-            invalidVm.PendingDiscountAmount = requested;
-            invalidVm.PendingDiscountReason = model.PendingDiscountReason;
-            invalidVm.DiscountAmountInput = requested;
-            invalidVm.DiscountReasonInput = model.PendingDiscountReason;
+            invalidVm.ShowDiscountApprovalPrompt = true;
+            invalidVm.ShowDiscountPercentOptions = false;
             return View("MakeSale", invalidVm);
         }
 
+        var existingDiscount = GetDiscount();
         SaveDiscount(new SaleDiscountState
         {
-            DiscountAmount = requested,
-            DiscountReason = string.IsNullOrWhiteSpace(model.PendingDiscountReason) ? null : model.PendingDiscountReason.Trim(),
+            ApprovalGranted = true,
+            DiscountPercent = existingDiscount?.DiscountPercent,
+            DiscountAmount = existingDiscount?.DiscountAmount ?? 0m,
             ApprovedByEmployeeId = manager.EID,
             ApprovedAt = DateTime.UtcNow
         });
 
-        return View("MakeSale", BuildViewModel(cart, "Discount approved and applied."));
+        var approvedVm = BuildViewModel(cart, "Manager approval accepted. Select a discount percentage.");
+        approvedVm.ShowDiscountApprovalPrompt = false;
+        approvedVm.ShowDiscountPercentOptions = true;
+        return View("MakeSale", approvedVm);
+    }
+
+    [HttpPost]
+    public IActionResult ApplyDiscountPercent(MakeSaleView model)
+    {
+        var cart = GetCart();
+        var baseVm = BuildViewModel(cart);
+
+        if (cart.Count == 0)
+        {
+            return View("MakeSale", BuildViewModel(cart, "Add at least one item before applying a discount."));
+        }
+
+        var discount = GetDiscount();
+        if (discount == null || !discount.ApprovalGranted || string.IsNullOrWhiteSpace(discount.ApprovedByEmployeeId))
+        {
+            var approvalVm = BuildViewModel(cart, "Manager approval is required before selecting a discount.");
+            approvalVm.ShowDiscountApprovalPrompt = true;
+            approvalVm.ShowDiscountPercentOptions = false;
+            return View("MakeSale", approvalVm);
+        }
+
+        var selectedPercent = model.SelectedDiscountPercent ?? 0;
+        if (selectedPercent != 10 && selectedPercent != 15 && selectedPercent != 25)
+        {
+            var invalidPercentVm = BuildViewModel(cart, "Please select a valid discount percentage.");
+            invalidPercentVm.ShowDiscountApprovalPrompt = false;
+            invalidPercentVm.ShowDiscountPercentOptions = true;
+            return View("MakeSale", invalidPercentVm);
+        }
+
+        var discountAmount = Math.Round(baseVm.SubtotalBeforeDiscount * selectedPercent / 100m, 2);
+        discount.DiscountPercent = selectedPercent;
+        discount.DiscountAmount = discountAmount;
+        SaveDiscount(discount);
+
+        var appliedVm = BuildViewModel(cart, $"{selectedPercent}% discount applied.");
+        appliedVm.ShowDiscountApprovalPrompt = false;
+        appliedVm.ShowDiscountPercentOptions = true;
+        return View("MakeSale", appliedVm);
     }
 
     [HttpPost]
@@ -458,8 +465,8 @@ public class TransactionsController : Controller
             employeeId = loggedInEmployeeId,
             paymentMethod = string.IsNullOrWhiteSpace(model.PaymentMethod) ? "Cash" : model.PaymentMethod,
             subtotal = discountedSubtotal,
+            discountPercent = discount?.DiscountPercent,
             discountAmount = discountAmount,
-            discountReason = discount?.DiscountReason,
             discountApprovedByEmployeeId = discount?.ApprovedByEmployeeId,
             discountApprovedAt = discount?.ApprovedAt,
             tax = tax,
