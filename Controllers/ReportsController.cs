@@ -40,6 +40,10 @@ namespace SE_Project___POS_System.Controllers
             viewModel.Transactions = transactions;
             viewModel.TotalTransactions = transactions.Count;
             viewModel.TotalSales = transactions.Sum(x => x.total);
+            viewModel.TotalRefunds = transactions
+                .Where(x => x.refundedAt.HasValue)
+                .Sum(x => x.refundAmount ?? 0m);
+            viewModel.RefundCount = transactions.Count(x => x.refundedAt.HasValue);
 
             return View(viewModel);
         }

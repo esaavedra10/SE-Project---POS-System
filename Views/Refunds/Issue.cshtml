@@ -1,0 +1,174 @@
+@model MongoExample.Models.ViewModels.RefundView
+
+@{
+    ViewData["Title"] = "Issue Refund";
+}
+
+<div style="min-height: 100vh; background-color: #eef2f7; padding: 24px;">
+    <div
+        style="width: 100%; max-width: 1100px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.10);">
+        <h1 style="margin-top: 0; margin-bottom: 6px;">Issue Refund</h1>
+        <p style="margin-top: 0; margin-bottom: 22px; color: #555;">
+            Review the original transaction and request manager approval to issue a refund.
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Message))
+        {
+            <div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background-color: #eef6ff; color: #1f4b99;">
+                @Model.Message
+            </div>
+        }
+
+        @if (Model.OriginalTransaction == null)
+        {
+            <a asp-controller="Refunds" asp-action="Lookup"
+                   style="display: inline-block; padding: 10px 16px; text-decoration: none; border-radius: 6px; background-color: #1f6feb; color: #ffffff;">
+                Search Again
+            </a>
+        }
+        else
+        {
+        <div style="display: grid; grid-template-columns: 1fr 360px; gap: 20px;">
+            <div
+                style="border: 1px solid #d9e2ec; border-radius: 12px; padding: 16px; background-color: #f8fafc;">
+                <h3 style="margin-top: 0; margin-bottom: 12px;">Original Transaction</h3>
+
+                <div style="margin-bottom: 6px;">
+                    <strong>Transaction Number:</strong> @Model.OriginalTransaction.transactionNumber
+                </div>
+                <div style="margin-bottom: 6px;">
+                    <strong>Cashier (Employee ID):</strong> @Model.OriginalTransaction.employeeId
+                </div>
+                <div style="margin-bottom: 6px;">
+                    <strong>Payment Method:</strong> @Model.OriginalTransaction.paymentMethod
+                </div>
+                <div style="margin-bottom: 6px;">
+                    <strong>Created (UTC):</strong> @Model.OriginalTransaction.createdAt.ToString("u")
+                </div>
+                @if (Model.OriginalTransaction.discountAmount > 0)
+                {
+                    <div style="margin-bottom: 6px;">
+                        <strong>Discount Applied:</strong> $@Model.OriginalTransaction.discountAmount
+                        @if (Model.OriginalTransaction.discountPercent.HasValue)
+                        {
+                            <span>(@Model.OriginalTransaction.discountPercent.Value%)</span>
+                        }
+                    </div>
+                }
+                <div style="margin-bottom: 6px;">
+                    <strong>Subtotal (after discount):</strong> $@Model.OriginalTransaction.subtotal
+                </div>
+                <div style="margin-bottom: 6px;">
+                    <strong>Tax:</strong> $@Model.OriginalTransaction.tax
+                </div>
+                <div style="margin-bottom: 16px; font-size: 18px;">
+                    <strong>Total:</strong> $@Model.OriginalTransaction.total
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color: #eaf0f6;">
+                            <th style="text-align: left; padding: 10px; border: 1px solid #cfd8e3;">SKU</th>
+                            <th style="text-align: left; padding: 10px; border: 1px solid #cfd8e3;">Item Name</th>
+                            <th style="text-align: center; padding: 10px; border: 1px solid #cfd8e3;">Qty</th>
+                            <th style="text-align: right; padding: 10px; border: 1px solid #cfd8e3;">Line Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OriginalTransaction.items)
+                        {
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #dbe3ec;">@item.sku</td>
+                                <td style="padding: 10px; border: 1px solid #dbe3ec;">@item.name</td>
+                                <td style="padding: 10px; border: 1px solid #dbe3ec; text-align: center;">@item.quantity</td>
+                                <td style="padding: 10px; border: 1px solid #dbe3ec; text-align: right;">$@item.lineTotal</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div
+                style="border: 1px solid #d9e2ec; border-radius: 12px; padding: 16px; background-color: #ffffff;">
+                <h3 style="margin-top: 0; margin-bottom: 12px;">Refund Summary</h3>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>Refund Amount</span>
+                    <strong>$@Model.OriginalTransaction.total</strong>
+                </div>
+
+                @if (Model.AlreadyRefunded)
+                {
+                    <div style="margin-top: 12px; padding: 10px; border-radius: 8px; background-color: #ffe6e6; color: #b00020;">
+                        <div style="font-weight: 600; margin-bottom: 4px;">Already Refunded</div>
+                        @if (!string.IsNullOrWhiteSpace(Model.RefundApprovedByEmployeeId))
+                        {
+                            <div style="font-size: 13px;">Approved by: <strong>@Model.RefundApprovedByEmployeeId</strong></div>
+                        }
+                        @if (Model.RefundApprovedAt.HasValue)
+                        {
+                            <div style="font-size: 13px;">Approved at (UTC): @Model.RefundApprovedAt.Value.ToString("u")</div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    @if (Model.ShowApprovalPrompt)
+                    {
+                        <form asp-controller="Refunds" asp-action="VerifyRefundApproval" method="post"
+                              style="margin-top: 12px; padding: 10px; border-radius: 8px; background-color: #fff3cd; color: #664d03; display: grid; gap: 8px;">
+                            <input asp-for="OriginalTransactionNumber" type="hidden" />
+                            <div>
+                                <label asp-for="RefundApprovalEmployeeId"
+                                       style="display: block; margin-bottom: 6px; font-weight: 600;">Manager Employee ID</label>
+                                <input asp-for="RefundApprovalEmployeeId" type="text"
+                                       style="width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px;" />
+                            </div>
+                            <div>
+                                <label asp-for="RefundApprovalPassword"
+                                       style="display: block; margin-bottom: 6px; font-weight: 600;">Manager Password</label>
+                                <input asp-for="RefundApprovalPassword" type="password"
+                                       style="width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px;" />
+                            </div>
+                            <button type="submit"
+                                    style="padding: 8px 12px; border: none; border-radius: 6px; background-color: #8957e5; color: white; cursor: pointer; font-weight: 600;">
+                                Approve Refund
+                            </button>
+                        </form>
+                    }
+
+                    @if (Model.ApprovalGranted)
+                    {
+                        <div style="margin-top: 12px; padding: 10px; border-radius: 8px; background-color: #e6ffed; color: #1a7f37;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">Manager Approval Accepted</div>
+                            @if (!string.IsNullOrWhiteSpace(Model.RefundApprovedByEmployeeId))
+                            {
+                                <div style="font-size: 13px;">Approved by: <strong>@Model.RefundApprovedByEmployeeId</strong></div>
+                            }
+                            @if (Model.RefundApprovedAt.HasValue)
+                            {
+                                <div style="font-size: 13px;">Approved at (UTC): @Model.RefundApprovedAt.Value.ToString("u")</div>
+                            }
+                        </div>
+
+                        <form asp-controller="Refunds" asp-action="IssueRefund" method="post" style="margin-top: 12px;">
+                            <input asp-for="OriginalTransactionNumber" type="hidden" />
+                            <button type="submit"
+                                    style="width: 100%; padding: 12px; border: none; border-radius: 8px; background-color: #d1242f; color: white; cursor: pointer; font-weight: 700;">
+                                Confirm Refund
+                            </button>
+                        </form>
+                    }
+                }
+
+                <div style="margin-top: 16px;">
+                    <a asp-controller="Refunds" asp-action="Lookup"
+                           style="display: inline-block; padding: 10px 14px; text-decoration: none; border-radius: 6px; background-color: #6c757d; color: #ffffff;">
+                        Search Another
+                    </a>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+</div>

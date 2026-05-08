@@ -9,6 +9,7 @@ public class DailyReportView
     public decimal TotalSales { get; set; }
     public int TotalTransactions { get; set; }
     public decimal TotalRefunds { get; set; } = 0m;
+    public int RefundCount { get; set; } = 0;
     public decimal TotalDiscounts { get; set; } = 0m;
     public List<Transactions> Transactions { get; set; } = new();
 }

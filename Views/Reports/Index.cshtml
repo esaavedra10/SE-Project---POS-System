@@ -31,7 +31,7 @@
 
         <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; background-color: #f8fafc; margin-bottom: 16px;">
             <h3 style="margin-top: 0; margin-bottom: 12px;">Report Results</h3>
-            <div style="display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 10px;">
+            <div style="display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)); gap: 10px;">
                 <div style="padding: 10px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <div style="font-size: 13px; color: #555;">Total Sales</div>
                     <div style="font-size: 20px; font-weight: 700;">@Model.TotalSales.ToString("C")</div>
@@ -43,6 +43,10 @@
                 <div style="padding: 10px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <div style="font-size: 13px; color: #555;">Total Refunds</div>
                     <div style="font-size: 20px; font-weight: 700;">@Model.TotalRefunds.ToString("C")</div>
+                </div>
+                <div style="padding: 10px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <div style="font-size: 13px; color: #555;">Refund Count</div>
+                    <div style="font-size: 20px; font-weight: 700;">@Model.RefundCount</div>
                 </div>
                 <div style="padding: 10px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <div style="font-size: 13px; color: #555;">Total Discounts</div>

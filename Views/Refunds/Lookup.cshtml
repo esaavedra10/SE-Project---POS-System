@@ -1,0 +1,45 @@
+@model MongoExample.Models.ViewModels.RefundView
+
+@{
+    ViewData["Title"] = "Issue Refund - Find Transaction";
+}
+
+<div style="min-height: 100vh; background-color: #eef2f7; padding: 24px;">
+    <div
+        style="width: 100%; max-width: 720px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.10);">
+        <h1 style="margin-top: 0; margin-bottom: 6px;">Issue Refund</h1>
+        <p style="margin-top: 0; margin-bottom: 22px; color: #555;">
+            Enter the original transaction number to begin the refund process.
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Message))
+        {
+            <div style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background-color: #fff3cd; color: #664d03;">
+                @Model.Message
+            </div>
+        }
+
+        <form asp-controller="Refunds" asp-action="Lookup" method="post"
+              style="display: flex; gap: 12px; align-items: end; margin-bottom: 22px;">
+            <div style="flex: 1;">
+                <label asp-for="OriginalTransactionNumber"
+                       style="display: block; margin-bottom: 6px; font-weight: 600;">
+                    Transaction Number
+                </label>
+                <input asp-for="OriginalTransactionNumber" type="text" autofocus
+                       placeholder="e.g. TXN-20260507213045"
+                       style="width: 100%; padding: 11px; border: 1px solid #c8d1dc; border-radius: 8px;" />
+            </div>
+
+            <button type="submit"
+                    style="padding: 11px 18px; border: none; border-radius: 8px; background-color: #1f6feb; color: #ffffff; cursor: pointer; font-weight: 600;">
+                Find Transaction
+            </button>
+        </form>
+
+        <a asp-controller="Home" asp-action="Index"
+               style="display: inline-block; padding: 10px 16px; text-decoration: none; border-radius: 6px; background-color: #6c757d; color: #ffffff;">
+            Back to Dashboard
+        </a>
+    </div>
+</div>

@@ -1,41 +1,44 @@
 @model MongoExample.Models.Transactions
 
 @{
-    ViewData["Title"] = "Sale Complete";
+    ViewData["Title"] = "Refund Complete";
 }
 
 <div style="min-height: 100vh; background-color: #eef2f7; padding: 24px;">
     <div
         style="width: 100%; max-width: 900px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.10);">
-        <h1 style="margin-top: 0;">Sale Complete</h1>
-        <p style="color: #2ea043; font-weight: 600;">Transaction saved successfully.</p>
+        <h1 style="margin-top: 0;">Refund Complete</h1>
+        <p style="color: #d1242f; font-weight: 600;">Refund issued and recorded successfully.</p>
 
         <div style="margin-bottom: 20px;">
             <div><strong>Transaction Number:</strong> @Model.transactionNumber</div>
-            <div><strong>Employee ID:</strong> @Model.employeeId</div>
-            <div><strong>Payment Method:</strong> @Model.paymentMethod</div>
-            @if (Model.discountAmount > 0)
-            {
-                @if (Model.discountPercent.HasValue)
+            <div><strong>Original Cashier (Employee ID):</strong> @Model.employeeId</div>
+            <div><strong>Original Payment Method:</strong> @Model.paymentMethod</div>
+            <div><strong>Original Total:</strong> $@Model.total</div>
+
+            <div style="margin-top: 12px; padding: 10px; border-radius: 8px; background-color: #fff3cd; color: #664d03;">
+                <div style="font-weight: 600; margin-bottom: 4px;">Refund Details</div>
+                <div><strong>Refund Amount:</strong> $@(Model.refundAmount ?? 0m)</div>
+                @if (Model.refundedAt.HasValue)
                 {
-                    <div><strong>Discount Percent:</strong> @Model.discountPercent.Value%</div>
+                    <div><strong>Refunded At (UTC):</strong> @Model.refundedAt.Value.ToString("u")</div>
                 }
-                <div><strong>Discount:</strong> $@Model.discountAmount</div>
-                @if (!string.IsNullOrWhiteSpace(Model.discountApprovedByEmployeeId))
+                @if (!string.IsNullOrWhiteSpace(Model.refundedByEmployeeId))
                 {
-                    <div><strong>Approved By (Employee ID):</strong> @Model.discountApprovedByEmployeeId</div>
+                    <div><strong>Refund Issued By (Employee ID):</strong> @Model.refundedByEmployeeId</div>
                 }
-                @if (Model.discountApprovedAt.HasValue)
+                @if (!string.IsNullOrWhiteSpace(Model.refundApprovedByEmployeeId))
                 {
-                    <div><strong>Approved At (UTC):</strong> @Model.discountApprovedAt.Value.ToString("u")</div>
+                    <div><strong>Manager Approval (Employee ID):</strong> @Model.refundApprovedByEmployeeId</div>
                 }
-            }
-            <div><strong>Subtotal (after discount):</strong> $@Model.subtotal</div>
-            <div><strong>Tax:</strong> $@Model.tax</div>
-            <div><strong>Total:</strong> $@Model.total</div>
+                @if (Model.refundApprovedAt.HasValue)
+                {
+                    <div><strong>Approved At (UTC):</strong> @Model.refundApprovedAt.Value.ToString("u")</div>
+                }
+            </div>
         </div>
 
-        <h3>Items</h3>
+        <h3>Refunded Items</h3>
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
             <thead>
                 <tr style="background-color: #eaf0f6;">
@@ -58,14 +61,9 @@
             </tbody>
         </table>
 
-        <a asp-controller="Transactions" asp-action="MakeSale"
+        <a asp-controller="Home" asp-action="Index"
                style="display: inline-block; padding: 10px 16px; text-decoration: none; border-radius: 6px; background-color: #1f6feb; color: #ffffff;">
-            Start New Sale
-        </a>
-
-        <a asp-controller="Refunds" asp-action="Issue" asp-route-transactionNumber="@Model.transactionNumber"
-               style="display: inline-block; margin-left: 8px; padding: 10px 16px; text-decoration: none; border-radius: 6px; background-color: #d1242f; color: #ffffff;">
-            Issue Refund for this transaction
+            Back to Dashboard
         </a>
     </div>
 </div>

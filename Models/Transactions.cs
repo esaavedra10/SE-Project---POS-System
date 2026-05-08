@@ -37,6 +37,26 @@ public class Transactions
     [BsonIgnoreIfNull]
     public DateTime? discountApprovedAt { get; set; }
 
+    [BsonElement("refundAmount")]
+    [BsonIgnoreIfNull]
+    public decimal? refundAmount { get; set; }
+
+    [BsonElement("refundedAt")]
+    [BsonIgnoreIfNull]
+    public DateTime? refundedAt { get; set; }
+
+    [BsonElement("refundedByEmployeeId")]
+    [BsonIgnoreIfNull]
+    public string? refundedByEmployeeId { get; set; }
+
+    [BsonElement("refundApprovedByEmployeeId")]
+    [BsonIgnoreIfNull]
+    public string? refundApprovedByEmployeeId { get; set; }
+
+    [BsonElement("refundApprovedAt")]
+    [BsonIgnoreIfNull]
+    public DateTime? refundApprovedAt { get; set; }
+
     [BsonElement("tax")]
     public decimal tax { get; set; }
 
