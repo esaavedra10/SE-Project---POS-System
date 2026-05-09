@@ -16,7 +16,6 @@ Inspect the current ASP.NET Core MVC POS project and tell me what is already imp
 7. discount tracking,
 8. age-restricted item approval.
 
-Do not change code yet. Give me a file-by-file summary of what exists, what is incomplete, and the safest next implementation step for MVP final submission.
 
 **Purpose:**
 
@@ -45,3 +44,107 @@ Implemented report discount totals and discount count.
 **Commit:**
 
 Calculate discount totals in daily reports
+
+## 3. Role/login inspection prompt
+
+**Prompt:**
+
+Now inspect the current employee authentication flow in detail.
+
+**Purpose:**
+
+Used to understand how employee login worked before adding role-based access.
+
+**Result:**
+
+Identified where login session data was being set and where manager/employee role logic should be added.
+
+## 4. Role-based access prompt
+
+**Prompt:**
+
+Implement the safest first step for role-based access without breaking the current login flow.
+
+**Purpose:**
+
+Used to add manager/employee role handling while preserving the existing login process.
+
+**Result:**
+
+Added session-based role handling so the system could distinguish managers from employees.
+
+## 5. Manager PID mapping fix prompt
+
+**Prompt:**
+
+Apply the smallest safe fix only. Update DetermineRole() in Controllers/AuthController.cs so it matches the real employee PID schema:
+- if PID starts with "M" -> return "Manager"
+- otherwise return "Employee".
+
+**Purpose:**
+
+Used to fix manager detection because the real employee PID values were M1, M2, and E1.
+
+**Result:**
+
+Manager logins were correctly recognized when the PID started with M.
+
+## 6. Manager-only product voiding prompt
+
+**Prompt:**
+
+Now implement the actual manager-only product voiding feature using the reusable session-based manager guard.
+
+**Purpose:**
+
+Used to add a manager-only product void function.
+
+**Result:**
+
+Managers can void products, employees cannot, and voided products are marked in MongoDB instead of being deleted.
+
+## 7. Block sale of voided products prompt
+
+**Prompt:**
+
+Now implement the next incremental step: block the sale of voided products in the current sale flow.
+
+**Purpose:**
+
+Used to make sure voided products could not still be sold.
+
+**Result:**
+
+The transaction flow now blocks products where isVoided is true.
+
+## 8. Lookup void status display prompt
+
+**Prompt:**
+
+The item is not visually showing as voided after I press Void Product, because the lookup/details UI still says "In Stock". Apply the smallest safe fix.
+
+**Purpose:**
+
+Used to fix the lookup page so voided products display the correct status.
+
+**Result:**
+
+The lookup page now prioritizes Voided status before Out of Stock or In Stock.
+
+## 9. Printable receipt prompt
+
+**Prompt:**
+
+Add the smallest safe print receipt feature.
+
+In Views/Transactions/SaleComplete.cshtml, add a visible "Print Receipt" button that calls window.print(). Add minimal print-only CSS so the receipt content prints cleanly and navigation/buttons do not print if practical.
+
+Do not add PDF generation, email sending, printer hardware logic, or new services. Treat the existing SaleComplete page as the receipt page. Do not modify appsettings.json. Keep the change small and explain the exact files changed.
+
+**Purpose:**
+
+Used to add a printable receipt option after a completed sale.
+
+**Result:**
+
+Added a Print Receipt button to the sale completion page. The button calls `window.print()`, and print-specific CSS hides navigation/action controls so the receipt prints more cleanly.

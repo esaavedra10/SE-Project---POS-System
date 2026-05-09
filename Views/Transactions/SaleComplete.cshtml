@@ -4,8 +4,33 @@
     ViewData["Title"] = "Sale Complete";
 }
 
-<div style="min-height: 100vh; background-color: #eef2f7; padding: 24px;">
-    <div
+<style>
+    @@media print {
+        header, footer { display: none !important; }
+        body { background: #fff !important; margin: 0; }
+        .container, main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+        .sale-complete-page {
+            min-height: auto !important;
+            background: #fff !important;
+            padding: 0 !important;
+        }
+        .sale-complete-receipt {
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 12px !important;
+        }
+        .no-print { display: none !important; }
+        .sale-complete-receipt table {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+</style>
+
+<div class="sale-complete-page" style="min-height: 100vh; background-color: #eef2f7; padding: 24px;">
+    <div class="sale-complete-receipt"
         style="width: 100%; max-width: 900px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.10);">
         <h1 style="margin-top: 0;">Sale Complete</h1>
         <p style="color: #2ea043; font-weight: 600;">Transaction saved successfully.</p>
@@ -58,14 +83,20 @@
             </tbody>
         </table>
 
-        <a asp-controller="Transactions" asp-action="MakeSale"
-               style="display: inline-block; padding: 10px 16px; text-decoration: none; border-radius: 6px; background-color: #1f6feb; color: #ffffff;">
-            Start New Sale
-        </a>
+        <div class="no-print" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+            <button type="button" onclick="window.print()"
+                    style="padding: 10px 16px; border: none; border-radius: 6px; background-color: #6c757d; color: #ffffff; cursor: pointer; font-weight: 600;">
+                Print Receipt
+            </button>
+            <a asp-controller="Transactions" asp-action="MakeSale"
+                   style="display: inline-block; padding: 10px 16px; text-decoration: none; border-radius: 6px; background-color: #1f6feb; color: #ffffff;">
+                Start New Sale
+            </a>
 
-        <a asp-controller="Refunds" asp-action="Issue" asp-route-transactionNumber="@Model.transactionNumber"
-               style="display: inline-block; margin-left: 8px; padding: 10px 16px; text-decoration: none; border-radius: 6px; background-color: #d1242f; color: #ffffff;">
-            Issue Refund for this transaction
-        </a>
+            <a asp-controller="Refunds" asp-action="Issue" asp-route-transactionNumber="@Model.transactionNumber"
+                   style="display: inline-block; padding: 10px 16px; text-decoration: none; border-radius: 6px; background-color: #d1242f; color: #ffffff;">
+                Issue Refund for this transaction
+            </a>
+        </div>
     </div>
 </div>
