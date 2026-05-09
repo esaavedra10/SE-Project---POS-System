@@ -44,6 +44,8 @@ namespace SE_Project___POS_System.Controllers
                 .Where(x => x.refundedAt.HasValue)
                 .Sum(x => x.refundAmount ?? 0m);
             viewModel.RefundCount = transactions.Count(x => x.refundedAt.HasValue);
+            viewModel.TotalDiscounts = transactions.Sum(x => x.discountAmount);
+            viewModel.DiscountCount = transactions.Count(x => x.discountAmount > 0);
 
             return View(viewModel);
         }

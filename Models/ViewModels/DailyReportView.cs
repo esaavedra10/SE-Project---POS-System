@@ -11,5 +11,6 @@ public class DailyReportView
     public decimal TotalRefunds { get; set; } = 0m;
     public int RefundCount { get; set; } = 0;
     public decimal TotalDiscounts { get; set; } = 0m;
+    public int DiscountCount { get; set; }
     public List<Transactions> Transactions { get; set; } = new();
 }
