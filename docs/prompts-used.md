@@ -168,3 +168,19 @@ Do not redesign the transaction flow. Do not modify appsettings.json. Keep Card/
 Used to improve the cash payment flow by recording cash received, validating sufficient payment, and calculating change due.
 
 Added cash received and change due support for cash payments. The sale screen now shows a Cash Received field when Cash is selected, validates that the cash received is enough to cover the total, calculates change due, saves cash values on the transaction, and displays cash received/change due on the sale completion page.
+
+## 11. Manager approval for age-restricted sales prompt
+
+**Prompt:**
+
+Update the age-restricted item approval flow to require manager credentials instead of any employee credentials.
+
+Use the existing EmployeeServices.ValidateManagerCredentialsAsync method if available, matching the discount/refund manager approval style. Do not redesign the sale flow. Keep the current two-step approval UI. Do not modify appsettings.json. Keep changes small and explain the exact files changed.
+
+**Purpose:**
+
+Used to make age-restricted item approval consistent with other manager-only approval workflows.
+
+**Result:**
+
+Updated the age-restricted item approval flow so restricted item approval now requires manager credentials. The existing two-step approval UI was preserved, and the approval check now uses the manager credential validation method instead of accepting any employee credentials.

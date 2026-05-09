@@ -224,16 +224,19 @@ public class TransactionsController : Controller
 
         if (string.IsNullOrWhiteSpace(model.ApprovalEmployeeId) || string.IsNullOrWhiteSpace(model.ApprovalPassword))
         {
-            var missingVm = BuildViewModel(cart, "Please enter both Employee ID and Password.");
+            var missingVm = BuildViewModel(cart, "Please enter manager Employee ID and Password.");
             missingVm.PendingRestrictedSku = sku;
             missingVm.ShowApprovalLogin = true;
             return View("MakeSale", missingVm);
         }
 
-        var employee = await _employeeServices.GetByEmployeeIdAsync(model.ApprovalEmployeeId);
-        if (employee == null || employee.password != model.ApprovalPassword)
+        var manager = await _employeeServices.ValidateManagerCredentialsAsync(
+            model.ApprovalEmployeeId,
+            model.ApprovalPassword);
+
+        if (manager == null)
         {
-            var invalidVm = BuildViewModel(cart, "Invalid employee credentials.");
+            var invalidVm = BuildViewModel(cart, "Invalid manager credentials.");
             invalidVm.PendingRestrictedSku = sku;
             invalidVm.ShowApprovalLogin = true;
             return View("MakeSale", invalidVm);
