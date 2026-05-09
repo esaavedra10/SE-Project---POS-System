@@ -11,7 +11,7 @@
     ITEM LOOKUP PAGE
     This page receives an ItemLookupView model from ItemsController.
     It uses:
-    - Model.SearchTerm        -> what the user typed into the search box
+    - Model.SearchTerm        -> SKU entered by the user (matched via GetBySkuAsync)
     - Model.SelectedProduct   -> the product found from MongoDB
 -->
 
@@ -22,7 +22,7 @@
         <!-- Page Title -->
         <h1 style="margin-top: 0; margin-bottom: 6px;">Look Up Item</h1>
         <p style="margin-top: 0; margin-bottom: 22px; color: #555;">
-            Search the ACE SuperMart catalog by item name, UPC, or SKU.
+            Search the ACE SuperMart catalog by SKU.
         </p>
 
         <!--

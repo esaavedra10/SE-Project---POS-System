@@ -202,3 +202,19 @@ Used to align the payment options with the project requirement that only cash an
 **Result:**
 
 Removed Mobile Pay from the payment options. The sale screen now only displays Cash and Card, and the transaction controller validates payment methods so only Cash or Card are accepted.
+
+## 13. Remove UPC wording prompt
+
+**Prompt:**
+
+Remove UPC-related wording from the POS app and keep item lookup/search based on SKU.
+
+Update visible UI text, labels, helper text, and documentation comments if needed so the app no longer claims UPC lookup or UPC scanning support. Keep SKU search and item name search if currently supported. Do not change database schema unless necessary. Do not modify appsettings.json. Keep changes small and explain the exact files changed.
+
+**Purpose:**
+
+Used to align the item lookup and sale entry wording with the project decision to use SKU only instead of UPC.
+
+**Result:**
+
+Removed UPC-related wording from the POS app. Item lookup and sale entry now describe SKU-based search/entry, while still keeping existing SKU and item name search behavior where already supported.

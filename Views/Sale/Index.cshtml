@@ -8,7 +8,7 @@
     <div
         style="width: 100%; max-width: 980px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.10);">
         <h1 style="margin-top: 0; margin-bottom: 6px;">Start Sale</h1>
-        <p style="margin-top: 0; margin-bottom: 18px; color: #555;">Scan items quickly and review the cart before
+        <p style="margin-top: 0; margin-bottom: 18px; color: #555;">Add items by SKU and review the cart before
             checkout.</p>
 
             @if (!string.IsNullOrWhiteSpace(Model.Message))
@@ -22,7 +22,7 @@
             <!-- Sends SKU input to TransactionsController -> AddItem -->
             <form asp-controller="Transactions" asp-action="AddItem" method="post"
                   style="display: flex; gap: 12px; margin-bottom: 22px;">
-                <input asp-for="SkuInput" type="text" placeholder="Scan barcode or enter Item ID" autofocus
+                <input asp-for="SkuInput" type="text" placeholder="Enter SKU" autofocus
                        style="flex: 1; padding: 13px; border: 1px solid #c8d1dc; border-radius: 8px; font-size: 16px;" />
 
                 <button type="submit"
