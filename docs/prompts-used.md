@@ -218,3 +218,27 @@ Used to align the item lookup and sale entry wording with the project decision t
 **Result:**
 
 Removed UPC-related wording from the POS app. Item lookup and sale entry now describe SKU-based search/entry, while still keeping existing SKU and item name search behavior where already supported.
+
+## 14. Unit test project prompt
+
+**Prompt:**
+
+Create an xUnit test project for this ASP.NET Core MVC POS solution.
+
+Add unit tests for the most critical project behavior, including:
+- cash payment validation,
+- change due calculation,
+- manager role detection,
+- blocked/voided product sale rules,
+- transaction model behavior,
+- report totals for sales, refunds, and discounts.
+
+Do not modify appsettings.json. Keep tests independent from live MongoDB if possible.
+
+**Purpose:**
+
+Used to create unit test cases for the required final submission testing section.
+
+**Result:**
+
+Created a separate xUnit test project with unit tests for core POS business behavior. The test suite passed with 27 tests succeeded and 0 failed.
