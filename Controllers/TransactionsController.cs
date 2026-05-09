@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MongoExample.Business;
 using MongoExample.Models;
 using MongoExample.Models.ViewModels;
 using MongoExample.Services;
@@ -475,20 +476,12 @@ public class TransactionsController : Controller
         var paymentMethod = string.Equals(rawPayment, "Card", StringComparison.OrdinalIgnoreCase) ? "Card" : "Cash";
         if (string.Equals(paymentMethod, "Cash", StringComparison.OrdinalIgnoreCase))
         {
-            if (!model.CashReceived.HasValue)
+            if (!CashPaymentRules.TryValidateCashPayment(model.CashReceived, total, out var cashError))
             {
-                var needCashVm = BuildViewModel(cart, "Enter cash received for cash payment.");
-                needCashVm.PaymentMethod = paymentMethod;
-                needCashVm.CashReceived = model.CashReceived;
-                return View("MakeSale", needCashVm);
-            }
-
-            if (model.CashReceived.Value < total)
-            {
-                var insufficientVm = BuildViewModel(cart, "Cash received must be greater than or equal to the total.");
-                insufficientVm.PaymentMethod = paymentMethod;
-                insufficientVm.CashReceived = model.CashReceived;
-                return View("MakeSale", insufficientVm);
+                var cashVm = BuildViewModel(cart, cashError);
+                cashVm.PaymentMethod = paymentMethod;
+                cashVm.CashReceived = model.CashReceived;
+                return View("MakeSale", cashVm);
             }
         }
 
@@ -520,7 +513,7 @@ public class TransactionsController : Controller
         {
             var received = model.CashReceived!.Value;
             transaction.cashReceived = received;
-            transaction.changeDue = Math.Round(received - total, 2);
+            transaction.changeDue = CashPaymentRules.ComputeChangeDue(received, total);
         }
 
         await _transactionServices.CreateAsync(transaction);

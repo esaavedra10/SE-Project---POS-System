@@ -1,3 +1,4 @@
+using MongoExample.Business;
 using MongoExample.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -42,13 +43,7 @@ public class EmployeeServices
             return null;
         }
 
-        var pid = employee.PID?.Trim();
-        if (string.IsNullOrEmpty(pid))
-        {
-            return null;
-        }
-
-        if (!pid.ToUpperInvariant().StartsWith("M"))
+        if (!EmployeeRoleRules.PidIndicatesManager(employee.PID))
         {
             return null;
         }

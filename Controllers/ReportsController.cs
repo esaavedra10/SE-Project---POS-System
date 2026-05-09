@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MongoExample.Business;
 using MongoExample.Models.ViewModels;
 using MongoExample.Services;
 
@@ -40,12 +41,10 @@ namespace SE_Project___POS_System.Controllers
             viewModel.Transactions = transactions;
             viewModel.TotalTransactions = transactions.Count;
             viewModel.TotalSales = transactions.Sum(x => x.total);
-            viewModel.TotalRefunds = transactions
-                .Where(x => x.refundedAt.HasValue)
-                .Sum(x => x.refundAmount ?? 0m);
-            viewModel.RefundCount = transactions.Count(x => x.refundedAt.HasValue);
-            viewModel.TotalDiscounts = transactions.Sum(x => x.discountAmount);
-            viewModel.DiscountCount = transactions.Count(x => x.discountAmount > 0);
+            viewModel.TotalRefunds = ReportAggregation.TotalRefundAmounts(transactions);
+            viewModel.RefundCount = ReportAggregation.RefundTransactionCount(transactions);
+            viewModel.TotalDiscounts = ReportAggregation.TotalDiscounts(transactions);
+            viewModel.DiscountCount = ReportAggregation.DiscountTransactionCount(transactions);
 
             return View(viewModel);
         }

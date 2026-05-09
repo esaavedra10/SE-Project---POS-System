@@ -12,4 +12,9 @@
     <PackageReference Include="MongoDB.Driver" Version="3.7.1" />
   </ItemGroup>
 
+  <!-- Test project lives under the same directory; exclude it from this web app compile. -->
+  <ItemGroup>
+    <Compile Remove="Point of Sales System.Tests/**/*.cs" />
+  </ItemGroup>
+
 </Project>
