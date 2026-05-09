@@ -462,7 +462,17 @@ public class TransactionsController : Controller
         var tax = Math.Round(discountedSubtotal * 0.0825m, 2);
         var total = discountedSubtotal + tax;
 
-        var paymentMethod = string.IsNullOrWhiteSpace(model.PaymentMethod) ? "Cash" : model.PaymentMethod;
+        var rawPayment = string.IsNullOrWhiteSpace(model.PaymentMethod) ? "Cash" : model.PaymentMethod.Trim();
+        if (!string.Equals(rawPayment, "Cash", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(rawPayment, "Card", StringComparison.OrdinalIgnoreCase))
+        {
+            var invalidPmVm = BuildViewModel(cart, "Please select Cash or Card.");
+            invalidPmVm.PaymentMethod = "Cash";
+            invalidPmVm.CashReceived = model.CashReceived;
+            return View("MakeSale", invalidPmVm);
+        }
+
+        var paymentMethod = string.Equals(rawPayment, "Card", StringComparison.OrdinalIgnoreCase) ? "Card" : "Cash";
         if (string.Equals(paymentMethod, "Cash", StringComparison.OrdinalIgnoreCase))
         {
             if (!model.CashReceived.HasValue)

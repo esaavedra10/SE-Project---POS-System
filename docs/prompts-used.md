@@ -184,3 +184,21 @@ Used to make age-restricted item approval consistent with other manager-only app
 **Result:**
 
 Updated the age-restricted item approval flow so restricted item approval now requires manager credentials. The existing two-step approval UI was preserved, and the approval check now uses the manager credential validation method instead of accepting any employee credentials.
+
+## 12. Remove Mobile Pay prompt
+
+**Prompt:**
+
+Remove Mobile Pay as a payment option from the POS system.
+
+Keep only Cash and Card as valid payment methods. Update the sale screen payment dropdown, controller validation if needed, transaction model logic if needed, and any related display text so the application no longer presents Mobile Pay as an option.
+
+Do not redesign the transaction flow. Do not modify appsettings.json. Keep existing Cash behavior with cash received/change due. Keep existing Card behavior as the simulated card payment option. Keep changes small and explain the exact files changed.
+
+**Purpose:**
+
+Used to align the payment options with the project requirement that only cash and card payments are supported.
+
+**Result:**
+
+Removed Mobile Pay from the payment options. The sale screen now only displays Cash and Card, and the transaction controller validates payment methods so only Cash or Card are accepted.
