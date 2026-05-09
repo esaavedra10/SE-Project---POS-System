@@ -39,6 +39,14 @@
             <div><strong>Transaction Number:</strong> @Model.transactionNumber</div>
             <div><strong>Employee ID:</strong> @Model.employeeId</div>
             <div><strong>Payment Method:</strong> @Model.paymentMethod</div>
+            @if (string.Equals(Model.paymentMethod, "Cash", StringComparison.OrdinalIgnoreCase) && Model.cashReceived.HasValue)
+            {
+                <div><strong>Cash Received:</strong> $@Model.cashReceived.Value</div>
+                @if (Model.changeDue.HasValue)
+                {
+                    <div><strong>Change Due:</strong> $@Model.changeDue.Value</div>
+                }
+            }
             @if (Model.discountAmount > 0)
             {
                 @if (Model.discountPercent.HasValue)

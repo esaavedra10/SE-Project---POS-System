@@ -148,3 +148,23 @@ Used to add a printable receipt option after a completed sale.
 **Result:**
 
 Added a Print Receipt button to the sale completion page. The button calls `window.print()`, and print-specific CSS hides navigation/action controls so the receipt prints more cleanly.
+
+## 10. Cash tender and change due prompt
+
+**Prompt:**
+
+Inspect the current cash payment flow in TransactionsController and Views/Transactions/MakeSale.cshtml.
+
+If cash received and change due are not implemented, add the smallest MVP version:
+- show a Cash Received input only when Cash is selected,
+- validate cash received is greater than or equal to the transaction total,
+- calculate Change Due,
+- pass cash received and change due to the SaleComplete page if the current model supports it, or add minimal view model properties if needed.
+
+Do not redesign the transaction flow. Do not modify appsettings.json. Keep Card/Mobile Pay behavior unchanged. Keep changes small and list the files changed.
+
+**Purpose:**
+
+Used to improve the cash payment flow by recording cash received, validating sufficient payment, and calculating change due.
+
+Added cash received and change due support for cash payments. The sale screen now shows a Cash Received field when Cash is selected, validates that the cash received is enough to cover the total, calculates change due, saves cash values on the transaction, and displays cash received/change due on the sale completion page.

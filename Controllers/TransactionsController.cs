@@ -459,11 +459,31 @@ public class TransactionsController : Controller
         var tax = Math.Round(discountedSubtotal * 0.0825m, 2);
         var total = discountedSubtotal + tax;
 
+        var paymentMethod = string.IsNullOrWhiteSpace(model.PaymentMethod) ? "Cash" : model.PaymentMethod;
+        if (string.Equals(paymentMethod, "Cash", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!model.CashReceived.HasValue)
+            {
+                var needCashVm = BuildViewModel(cart, "Enter cash received for cash payment.");
+                needCashVm.PaymentMethod = paymentMethod;
+                needCashVm.CashReceived = model.CashReceived;
+                return View("MakeSale", needCashVm);
+            }
+
+            if (model.CashReceived.Value < total)
+            {
+                var insufficientVm = BuildViewModel(cart, "Cash received must be greater than or equal to the total.");
+                insufficientVm.PaymentMethod = paymentMethod;
+                insufficientVm.CashReceived = model.CashReceived;
+                return View("MakeSale", insufficientVm);
+            }
+        }
+
         var transaction = new Transactions
         {
             transactionNumber = $"TXN-{DateTime.Now:yyyyMMddHHmmss}",
             employeeId = loggedInEmployeeId,
-            paymentMethod = string.IsNullOrWhiteSpace(model.PaymentMethod) ? "Cash" : model.PaymentMethod,
+            paymentMethod = paymentMethod,
             subtotal = discountedSubtotal,
             discountPercent = discount?.DiscountPercent,
             discountAmount = discountAmount,
@@ -482,6 +502,13 @@ public class TransactionsController : Controller
                 lineTotal = x.lineTotal
             }).ToList()
         };
+
+        if (string.Equals(paymentMethod, "Cash", StringComparison.OrdinalIgnoreCase))
+        {
+            var received = model.CashReceived!.Value;
+            transaction.cashReceived = received;
+            transaction.changeDue = Math.Round(received - total, 2);
+        }
 
         await _transactionServices.CreateAsync(transaction);
 

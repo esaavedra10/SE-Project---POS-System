@@ -66,6 +66,14 @@ public class Transactions
     [BsonElement("paymentMethod")]
     public string paymentMethod { get; set; } = null!;
 
+    [BsonElement("cashReceived")]
+    [BsonIgnoreIfNull]
+    public decimal? cashReceived { get; set; }
+
+    [BsonElement("changeDue")]
+    [BsonIgnoreIfNull]
+    public decimal? changeDue { get; set; }
+
     [BsonElement("createdAt")]
     public DateTime createdAt { get; set; } = DateTime.UtcNow;
 }

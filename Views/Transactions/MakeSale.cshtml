@@ -226,11 +226,11 @@
                         <strong>$@Model.Total</strong>
                     </div>
 
-                    <form asp-controller="Transactions" asp-action="CompleteSale" method="post">
+                    <form asp-controller="Transactions" asp-action="CompleteSale" method="post" id="complete-sale-form">
                         <div style="margin-bottom: 12px;">
                             <label asp-for="PaymentMethod"
                                    style="display: block; margin-bottom: 6px; font-weight: 600;">Payment Method</label>
-                            <select asp-for="PaymentMethod"
+                            <select asp-for="PaymentMethod" id="payment-method-select"
                                     style="width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px;">
                                 <option value="Cash">Cash</option>
                                 <option value="Card">Card</option>
@@ -238,11 +238,59 @@
                             </select>
                         </div>
 
+                        <div id="cash-payment-fields" style="margin-bottom: 12px; display: @(Model.PaymentMethod == "Cash" ? "block" : "none");"
+                             data-sale-total="@Model.Total.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                            <label asp-for="CashReceived" style="display: block; margin-bottom: 6px; font-weight: 600;">Cash Received</label>
+                            <input asp-for="CashReceived" type="number" step="0.01" min="0"
+                                   style="width: 100%; padding: 10px; border: 1px solid #c8d1dc; border-radius: 8px;" />
+                            <div id="change-due-preview" style="margin-top: 8px; font-size: 14px; color: #333;"></div>
+                        </div>
+
                         <button type="submit"
                                 style="width: 100%; padding: 12px; border: none; border-radius: 8px; background-color: #2ea043; color: white; cursor: pointer; font-weight: 600;">
                             Complete Sale
                         </button>
                     </form>
+                    <script>
+                        (function () {
+                            var sel = document.getElementById('payment-method-select');
+                            var row = document.getElementById('cash-payment-fields');
+                            var input = document.querySelector('#complete-sale-form input[name="CashReceived"]');
+                            var preview = document.getElementById('change-due-preview');
+                            if (!sel || !row || !preview) return;
+
+                            function parseTotal() {
+                                var t = parseFloat(row.getAttribute('data-sale-total'));
+                                return isNaN(t) ? 0 : t;
+                            }
+
+                            function updateChangePreview() {
+                                if (sel.value !== 'Cash') {
+                                    preview.textContent = '';
+                                    return;
+                                }
+                                var total = parseTotal();
+                                var raw = input && input.value !== '' ? parseFloat(input.value) : NaN;
+                                if (isNaN(raw)) {
+                                    preview.textContent = 'Change due: —';
+                                    return;
+                                }
+                                var change = Math.round((raw - total) * 100) / 100;
+                                preview.textContent = change >= 0
+                                    ? 'Change due: $' + change.toFixed(2)
+                                    : 'Change due: $' + change.toFixed(2) + ' (need at least total)';
+                            }
+
+                            function syncCashRow() {
+                                row.style.display = sel.value === 'Cash' ? 'block' : 'none';
+                                updateChangePreview();
+                            }
+
+                            sel.addEventListener('change', syncCashRow);
+                            if (input) input.addEventListener('input', updateChangePreview);
+                            syncCashRow();
+                        })();
+                    </script>
                 </div>
             </div>
         </div>

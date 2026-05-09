@@ -22,6 +22,8 @@ public class MakeSaleView
     // Payment selection
     public string PaymentMethod { get; set; } = "Cash";
 
+    public decimal? CashReceived { get; set; }
+
     // Optional message for success/error text
     public string? Message { get; set; }
     public string? PendingRestrictedSku { get; set; }
