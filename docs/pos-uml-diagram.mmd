@@ -1,146 +1,248 @@
+%% ACE SuperMart POS – ASP.NET Core MVC + MongoDB (from current codebase)
+%% Manager: Session "EmployeeRole" = Manager when employee PID starts with "M" (login).
+%% Manager gate: ControllerRoleGuards.RequireManagerFromSession on product void only.
+%% Manager credentials: EmployeeServices.ValidateManagerCredentialsAsync (PID prefix M) for discounts, refunds, age-restricted approval.
+
 classDiagram
-direction LR
+  direction TB
 
-class AuthController {
-  - EmployeeServices _employeeServices
-  + Login() IActionResult
-  + Login(employeeId, password) Task~IActionResult~
-  + Logout() IActionResult
-  - DetermineRole(employee) string
-}
+  %% --- MongoDB document models (collections: Employees, Products, Transactions) ---
+  class Employees {
+    +string Id
+    +string name
+    +string EID
+    +string PID
+    +string password
+  }
 
-class ProductsController {
-  - ProductsServices _productsServices
-  + Index() Task~IActionResult~
-  + Details(id) Task~IActionResult~
-  + Create() IActionResult
-  + Create(product) Task~IActionResult~
-  + Edit(id) Task~IActionResult~
-  + Edit(id, product) Task~IActionResult~
-  + Delete(id) Task~IActionResult~
-  + DeleteConfirmed(id) Task~IActionResult~
-  + VoidProduct(id, voidReason) Task~IActionResult~
-}
+  class Products {
+    +string Id
+    +string sku
+    +string name
+    +decimal price
+    +int stock
+    +bool ageRestricted
+    +bool isVoided
+    +string voidReason
+    +string voidedBy
+    +DateTime voidedAt
+  }
 
-class TransactionsController {
-  - TransactionServices _transactionServices
-  - ProductsServices _productsServices
-  + MakeSale() IActionResult
-  + AddItem(model) Task~IActionResult~
-  + ConfirmRestricted(sku, isApproved) Task~IActionResult~
-  + RemoveItem(sku) IActionResult
-  + CompleteSale(model) Task~IActionResult~
-  + SaleComplete(transactionNumber) Task~IActionResult~
-}
+  class Transactions {
+    +string Id
+    +string transactionNumber
+    +string employeeId
+    +items list of TransactionItem
+    +decimal subtotal
+    +decimal tax
+    +decimal total
+    +string paymentMethod
+    +decimal cashReceived
+    +decimal changeDue
+    +decimal discountAmount
+    +int discountPercent
+    +string discountApprovedByEmployeeId
+    +DateTime discountApprovedAt
+    +decimal refundAmount
+    +DateTime refundedAt
+    +string refundedByEmployeeId
+    +string refundApprovedByEmployeeId
+    +DateTime refundApprovedAt
+    +DateTime createdAt
+  }
 
-class ControllerRoleGuards {
-  <<static>>
-  + RequireManagerFromSession(controller) IActionResult?
-}
+  class TransactionItem {
+    +string productId
+    +string sku
+    +string name
+    +decimal price
+    +int quantity
+    +decimal lineTotal
+  }
 
-class Products {
-  + string? Id
-  + string name
-  + string category
-  + string brand
-  + string sku
-  + decimal price
-  + int stock
-  + bool taxable
-  + bool? ageRestricted
-  + bool isVoided
-  + string? voidReason
-  + string? voidedBy
-  + DateTime? voidedAt
-}
+  class MongoDBSettings {
+    +string ConnectionURI
+    +string DatabaseName
+    +string CollectionName
+  }
 
-class Employees {
-  + string? Id
-  + string name
-  + string EID
-  + string PID
-  + string DID
-  + string password
-}
+  %% --- Services ---
+  class EmployeeServices {
+    -IMongoCollection _employeeCollection
+    +GetByEmployeeIdAsync()
+    +ValidateManagerCredentialsAsync()
+    +GetAsync() Employees list
+    +CreateAsync() 
+    +UpdateAsync() 
+    +RemoveAsync() 
+  }
 
-class EmployeeServices {
-  - IMongoCollection~Employees~ _employeeCollection
-  + GetByEmployeeIdAsync(employeeId) Task~Employees?~
-}
+  class ProductsServices {
+    -IMongoCollection _productsCollection
+    +GetBySkuAsync()
+    +GetByNameAsync()
+    +GetAsync() Products list
+    +CreateAsync() 
+    +UpdateAsync() 
+    +RemoveAsync() 
+  }
 
-class ProductsServices {
-  - IMongoCollection~Products~ _productsCollection
-  + GetAsync(id) Task~Products?~
-  + GetBySkuAsync(sku) Task~Products?~
-  + UpdateAsync(id, product) Task
-}
+  class TransactionServices {
+    -IMongoCollection _transactionsCollection
+    +GetByTransactionNumberAsync()
+    +GetByDateRangeAsync() Transactions list
+    +CreateAsync() 
+    +UpdateAsync() 
+  }
 
-class TransactionServices {
-  - IMongoCollection~Transactions~ _transactionsCollection
-  + CreateAsync(transaction) Task
-}
+  %% --- Extensions ---
+  class ControllerRoleGuards {
+    <<static>>
+    +RequireManagerFromSession()
+  }
 
-class Transactions {
-  + string? Id
-  + string transactionNumber
-  + string employeeId
-  + List~TransactionItem~ items
-  + decimal subtotal
-  + decimal tax
-  + decimal total
-  + string paymentMethod
-  + DateTime createdAt
-}
+  %% --- ViewModels ---
+  class MakeSaleView {
+    +CartItems list
+    +decimal Total
+    +string PaymentMethod
+    +decimal CashReceived
+    +string PendingRestrictedSku
+    +bool ShowApprovalLogin
+    +discount and approval fields
+  }
 
-class LookupView {
-  <<Razor View>>
-  + Context.Session["EmployeeRole"]
-  + bool isManager
-  + POST Products/VoidProduct
-}
+  class SaleCartItem {
+    +string sku
+    +string name
+    +decimal price
+    +int quantity
+    +decimal lineTotal
+  }
 
-class SessionState {
-  <<Session>>
-  + EmployeeId: string
-  + EmployeeName: string
-  + EmployeeRole: string
-  + SaleCart: json
-}
+  class DailyReportView {
+    +DateTime SelectedDate
+    +decimal TotalSales
+    +decimal TotalRefunds
+    +decimal TotalDiscounts
+    +int DiscountCount
+    +Transactions list
+  }
 
-class MongoDB_Employees {
-  <<collection>>
-  + "Employees"
-}
+  class RefundView {
+    +string OriginalTransactionNumber
+    +Transactions OriginalTransaction
+    +bool ApprovalGranted
+    +refund approval fields
+  }
 
-class MongoDB_Products {
-  <<collection>>
-  + "Products"
-}
+  class ItemLookupView {
+    +string SearchTerm
+    +Products SelectedProduct
+  }
 
-class MongoDB_Transactions {
-  <<collection>>
-  + "Transactions"
-}
+  %% --- Controllers ---
+  class AuthController {
+    -EmployeeServices _employeeServices
+    +Login() GET POST
+    +Logout()
+    -DetermineRole() string
+  }
 
-AuthController --> EmployeeServices : validates login via GetByEmployeeIdAsync
-AuthController --> Employees : reads EID/PID/password
-AuthController --> SessionState : stores EmployeeId, EmployeeName, EmployeeRole
-AuthController ..> SessionState : PID startsWith("M") => EmployeeRole="Manager"
+  class HomeController {
+    +Index() dashboard
+    +Privacy()
+    +Error()
+  }
 
-ControllerRoleGuards ..> SessionState : checks EmployeeId and EmployeeRole
-ProductsController ..> ControllerRoleGuards : RequireManagerFromSession()
-ProductsController --> ProductsServices : load/update product
-ProductsController --> Products : sets isVoided, voidReason, voidedBy, voidedAt
-ProductsController ..> SessionState : uses EmployeeId for voidedBy
+  class SaleController {
+    +Index() redirect to MakeSale
+  }
 
-TransactionsController --> ProductsServices : AddItem/ConfirmRestricted checks product
-TransactionsController ..> Products : blocks sale when isVoided == true
-TransactionsController --> TransactionServices : persists completed sale
-TransactionsController ..> SessionState : reads EmployeeId, SaleCart
+  class TransactionsController {
+    -TransactionServices _transactionServices
+    -ProductsServices _productsServices
+    -EmployeeServices _employeeServices
+    +MakeSale()
+    +AddItem()
+    +ConfirmRestricted()
+    +VerifyApproval()
+    +RemoveItem()
+    +RequestDiscountApproval()
+    +VerifyDiscountApproval()
+    +ApplyDiscountPercent()
+    +CompleteSale()
+    +SaleComplete()
+  }
 
-LookupView ..> SessionState : reads EmployeeRole
-LookupView ..> ProductsController : shows "Void Product" only if isManager
+  class RefundsController {
+    -TransactionServices _transactionServices
+    -EmployeeServices _employeeServices
+    +Lookup()
+    +Issue()
+    +VerifyRefundApproval()
+    +IssueRefund()
+    +RefundComplete()
+  }
 
-EmployeeServices --> MongoDB_Employees : GetCollection("Employees")
-ProductsServices --> MongoDB_Products : GetCollection("Products")
-TransactionServices --> MongoDB_Transactions : GetCollection("Transactions")
+  class ReportsController {
+    -TransactionServices _transactionServices
+    +Index() GET POST daily aggregates
+  }
+
+  class ItemsController {
+    -ProductsServices _productsServices
+    +Lookup() GET POST
+  }
+
+  class ProductsController {
+    -ProductsServices _productsServices
+    +Index() CRUD views
+    +VoidProduct()
+  }
+
+  class EmployeesController {
+    -EmployeeServices _employeeServices
+    +Index() CRUD views
+  }
+
+  %% --- Relationships: persistence ---
+  EmployeeServices --> MongoDBSettings : IOptions config
+  EmployeeServices --> Employees : collection Employees
+  ProductsServices --> MongoDBSettings : IOptions config
+  ProductsServices --> Products : collection Products
+  TransactionServices --> MongoDBSettings : IOptions config
+  TransactionServices --> Transactions : collection Transactions
+
+  Transactions *-- TransactionItem : contains
+
+  %% --- Relationships: controllers to services ---
+  AuthController --> EmployeeServices
+  TransactionsController --> TransactionServices
+  TransactionsController --> ProductsServices
+  TransactionsController --> EmployeeServices
+  RefundsController --> TransactionServices
+  RefundsController --> EmployeeServices
+  ReportsController --> TransactionServices
+  ItemsController --> ProductsServices
+  ProductsController --> ProductsServices
+  EmployeesController --> EmployeeServices
+
+  ProductsController ..> ControllerRoleGuards : VoidProduct
+
+  %% --- Relationships: views / models ---
+  TransactionsController ..> MakeSaleView : MakeSale
+  MakeSaleView *-- SaleCartItem
+  ReportsController ..> DailyReportView
+  RefundsController ..> RefundView
+  ItemsController ..> ItemLookupView
+  RefundView ..> Transactions : loads
+  DailyReportView ..> Transactions : lists
+
+  TransactionsController ..> Transactions : CompleteSale inserts
+  RefundsController ..> Transactions : IssueRefund updates
+
+  %% Flow hints (no extra classes)
+  note for HomeController "View Home/Index links to Sale, Reports, Items, Refunds, Logout"
+  note for ItemsController "View Items/Lookup can post Products/VoidProduct (manager only)"
+  note for TransactionsController "Session cart SaleCart; blocks voided or out-of-stock; age-restrict uses manager login"

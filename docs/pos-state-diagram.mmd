@@ -1,61 +1,79 @@
+%% ACE SuperMart POS – high-level navigation and sale flow (from current MVC code)
+%% Session: EmployeeId, EmployeeName, EmployeeRole. Manager when PID starts with "M" at login.
+%% Void: UI only for managers (Items/Lookup). Non-manager POST to Products/VoidProduct -> Forbid (403).
+%% Sale: session cart SaleCart; CompleteSale requires login; cash requires CashReceived >= total.
+
 stateDiagram-v2
-direction LR
+  direction TB
 
-[*] --> Logged_Out
+  [*] --> LoggedOut
 
-state "Logged Out" as Logged_Out
-state "Login Screen" as Login_Screen
-state "Invalid Login" as Invalid_Login
-state "Authenticated Employee" as Auth_Employee
-state "Authenticated Manager" as Auth_Manager
-state "Dashboard" as Dashboard
-state "Item Lookup" as Item_Lookup
-state "View Product Details" as View_Product_Details
-state "Product Voiding" as Product_Voiding
-state "Product Voided" as Product_Voided
-state "Access Denied" as Access_Denied
-state "Start Sale" as Start_Sale
-state "Product Scanned" as Product_Scanned
-state "Cart Updated" as Cart_Updated
-state "Sale Blocked" as Sale_Blocked
-state "Payment Processing" as Payment_Processing
-state "Transaction Complete" as Transaction_Complete
-state "Reports" as Reports
-state "Logout" as Logout
+  state "Logged Out" as LoggedOut
+  state "Login Screen" as LoginScreen
+  state "Invalid Login" as InvalidLogin
+  state "Authenticated Employee" as AuthEmployee
+  state "Authenticated Manager" as AuthManager
+  state "Dashboard" as Dashboard
+  state "Item Lookup" as ItemLookup
+  state "Lookup Results / Item Details" as LookupResults
+  state "Access Denied" as AccessDenied
+  state "Start Sale" as StartSale
+  state "Age-Restricted Gate" as AgeGate
+  state "Cart Updated" as CartUpdated
+  state "Sale Blocked" as SaleBlocked
+  state "Payment Processing" as PaymentProcessing
+  state "Transaction Complete" as TxComplete
+  state "Reports" as Reports
+  state "Logout" as Logout
 
-Logged_Out --> Login_Screen : open app
-Login_Screen --> Invalid_Login : bad id/password
-Invalid_Login --> Login_Screen : retry
+  LoggedOut --> LoginScreen : app default route Auth/Login
 
-Login_Screen --> Auth_Manager : valid login && PID startsWith("M")
-Login_Screen --> Auth_Employee : valid login && other PID
+  LoginScreen --> InvalidLogin : wrong id or password
+  InvalidLogin --> LoginScreen : retry
 
-Auth_Manager --> Dashboard
-Auth_Employee --> Dashboard
+  LoginScreen --> AuthManager : valid login PID starts with M
+  LoginScreen --> AuthEmployee : valid login other PID
 
-Dashboard --> Item_Lookup : lookup item
-Item_Lookup --> View_Product_Details : product found
-View_Product_Details --> Item_Lookup : search again
+  AuthManager --> Dashboard : redirect Home/Index
+  AuthEmployee --> Dashboard : redirect Home/Index
 
-View_Product_Details --> Product_Voiding : manager clicks "Void Product"
-Product_Voiding --> Product_Voided : void saved (isVoided=true)
-Product_Voided --> Item_Lookup : show void status
+  Dashboard --> ItemLookup : Look Up Item
+  ItemLookup --> LookupResults : search POST product found
+  ItemLookup --> ItemLookup : search POST no match
 
-View_Product_Details --> Access_Denied : employee attempts voiding
-Access_Denied --> Dashboard
+  LookupResults --> LookupResults : search again
+  LookupResults --> Dashboard : Back to Dashboard
+  LookupResults --> ItemLookup : manager void success Products/VoidProduct
 
-Dashboard --> Start_Sale : make sale
-Start_Sale --> Product_Scanned : add item by SKU/name
-Product_Scanned --> Sale_Blocked : product.isVoided == true
-Sale_Blocked --> Start_Sale : choose another product
-Product_Scanned --> Cart_Updated : product valid and sellable
-Cart_Updated --> Product_Scanned : scan next item
-Cart_Updated --> Payment_Processing : complete sale
-Payment_Processing --> Transaction_Complete : transaction saved
-Transaction_Complete --> Dashboard : sale complete
+  LookupResults --> AccessDenied : non-manager POST VoidProduct
+  note right of AccessDenied : HTTP 403 Forbid via RequireManagerFromSession
 
-Dashboard --> Reports : open reports
-Reports --> Dashboard : back to dashboard
+  AccessDenied --> Dashboard : user navigates away
 
-Dashboard --> Logout : logout action
-Logout --> Logged_Out : session cleared
+  Dashboard --> StartSale : Start Sale to MakeSale
+
+  StartSale --> SaleBlocked : voided product
+  StartSale --> SaleBlocked : out of stock
+  StartSale --> StartSale : SKU or name not found
+  SaleBlocked --> StartSale : correct item or message cleared
+
+  StartSale --> AgeGate : age-restricted product Approve
+  AgeGate --> StartSale : Reject or bad manager login
+  AgeGate --> CartUpdated : manager VerifyApproval OK
+
+  StartSale --> CartUpdated : item added sellable
+  CartUpdated --> StartSale : add more remove items discounts
+
+  CartUpdated --> PaymentProcessing : Complete Sale submit
+  PaymentProcessing --> StartSale : cart empty or cash lt total
+  PaymentProcessing --> LoginScreen : session missing
+  PaymentProcessing --> TxComplete : MongoDB insert stock update
+
+  TxComplete --> Dashboard : back link
+  TxComplete --> StartSale : new sale link
+
+  Dashboard --> Reports : Generate Report
+  Reports --> Dashboard : back link
+
+  Dashboard --> Logout
+  Logout --> LoggedOut : Auth/Logout clears session
